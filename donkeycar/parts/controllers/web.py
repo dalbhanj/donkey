@@ -21,7 +21,7 @@ import tornado.ioloop
 import tornado.web
 import tornado.gen
 
-from ... import utils
+'''from ... import utils'''
 
 
 class RemoteWebServer():
@@ -128,7 +128,7 @@ class LocalWebController(tornado.web.Application):
 
         super().__init__(handlers, **settings)
 
-    def update(self, port=8887):
+    def update(self, port=8080):
         ''' Start the tornado webserver. '''
         print(port)
         self.port = int(port)
