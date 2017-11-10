@@ -172,8 +172,7 @@ def bin_Y(Y):
 def unbin_Y(Y):
     d=[]
     for y in Y:
-        v = np.argmax(y)
-        v = linear_unbin(v)
+        v = linear_unbin(y)
         d.append(v)
     return np.array(d)
 
@@ -221,3 +220,4 @@ def param_gen(params):
     '''
     for p in itertools.product(*params.values()):
         yield dict(zip(params.keys(), p ))
+
