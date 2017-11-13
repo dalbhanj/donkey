@@ -32,7 +32,7 @@
             <label class="group-label">Max Throttle</label><br/>
             <div class="form-group">
               <select id="max_throttle_select" class="form-control">
-                <option disabled selected> Select Max Throttle </option>
+                <option value="25" selected> 25% </option>
                 {% for t in [5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70, 75, 80, 85, 90, 100] %}
                   <option value="{{ t / 100.0 }}">{{ t }}%</option>
                 {% end %}
@@ -43,8 +43,8 @@
             <label class="group-label">Throttle Mode</label><br/>
             <div class="form-group">
               <select id="throttle_mode_select" class="form-control">
-                <option value="user" selected>User</option>
-                <option value="constant">Constant (Selected Max)</option>
+                <option value="user">User</option>
+                <option value="constant" selected>Constant (Selected Max)</option>
               </select>
             </div>
           </div>
@@ -87,10 +87,9 @@
           <label>Mode &amp; Pilot</label>
           <div class="form-group">
             <select id="mode_select" class="form-control">
-              <option disabled selected> Select Mode </option>
               <option value="user">User (d)</option>
               <option value="local">Local Pilot (d)</option>
-              <option value="local_angle">Local Angle (d)</option>
+              <option value="local_angle" selected>Local Angle (d)</option>
             </select>
           </div>
           <div class="form-group">
