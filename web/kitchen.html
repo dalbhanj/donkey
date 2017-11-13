@@ -1,0 +1,48 @@
+<!doctype html>
+<html class="no-js" lang="">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="x-ua-compatible" content="ie=edge">
+        <title>Waiterbot Kitchen</title>
+        <meta name="description" content="Kitchen dashboard for monitoring and fulfilling orders.">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+
+        <link rel="manifest" href="site.webmanifest">
+        <link rel="apple-touch-icon" href="icon.png">
+        <!-- Place favicon.ico in the root directory -->
+
+        <link rel="stylesheet" media="all" href="https://s3.amazonaws.com/dynatable-docs-assets/css/bootstrap-2.3.2.min.css" />
+        <link rel="stylesheet" media="all" href="https://s3.amazonaws.com/dynatable-docs-assets/css/jquery.dynatable.css" />
+        <link rel="stylesheet" href="css/normalize.css">
+        <link rel="stylesheet" href="css/main.css">
+    </head>
+    <body>
+        <div class="container">
+            <div class="jumbotron2">
+                <h1>Waiterbot Kitchen</h1>
+                <h4 class="center">Orders in currently in flight in the Waiterbot restaraunt.</h4>
+            </div>
+    
+            <div class="row" id="details">
+                <table id="orders" class="table table-bordered">
+                    <thead>
+                        <th data-dynatable-column='OrderId'>Order Timestamp</th>
+                        <th data-dynatable-column='Table'>Table</th>
+                        <th data-dynatable-column='MenuItem'>Item</th>
+                        <th data-dynatable-column='Fulfill'>Fulfill</th>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+
+        <script src="js/vendor/modernizr-3.5.0.min.js"></script>
+        <script src="https://code.jquery.com/jquery-3.2.1.min.js" integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=" crossorigin="anonymous"></script>
+        <script>window.jQuery || document.write('<script src="js/vendor/jquery-3.2.1.min.js"><\/script>')</script>
+        <script src="https://sdk.amazonaws.com/js/aws-sdk-2.130.0.min.js"></script>
+        <script src='https://s3.amazonaws.com/dynatable-docs-assets/js/jquery.dynatable.js'></script>
+        <script src="js/config.js"></script>
+        <script src="js/plugins.js"></script>
+        <script src="js/kitchen.js"></script>
+    </body>
+</html>
