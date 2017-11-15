@@ -15,11 +15,15 @@ pages:
         - 'Get driving.': guide/get_driving.md
         - 'Calibrate steering and throttle.': guide/calibrate.md
         - 'Train an autopilot.': guide/train_autopilot.md
+        - 'Donkey Simulator.': guide/simulator.md
     - Parts: 
         - 'About': parts/about.md
         - 'Actuators': parts/actuators.md
         - 'Controllers': parts/controllers.md
         - 'Stores': parts/stores.md
+        - 'IMU': parts/imu.md
+    - Utilities:
+        - 'donkey': utility/donkey.md
 
     - Contribute : contribute.md
     - Tests : tests.md

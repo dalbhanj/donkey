@@ -16,31 +16,36 @@ your car with `Ctrl-c` in the ssh session for your car.
 5. The data you've collected is in the data folder in the most recent tub folder.
 
 
-## Transfer data from your car to you computer. 
+## Transfer data from your car to your computer. 
 
-Since the Raspberry Pi is not very powerful we need to transfer the data
-to our computer to train. 
+Since the Raspberry Pi is not very powerful, we need to transfer the data
+to a PC computer to train.
 
-In a new terminal session on your comptuer use rsync to copy your cars 
-folder. 
-```
-rsync -r pi@<your_pi_ip_address>:~/d2/data  ~/d2/data
-```
-
-
-## Train a model.
-5. In the same terminal you can now run the training script on the latest tub.
-```
- python ~/d2/manage.py train --tub <tub folder names comma separated> --model mypilot
+In a new terminal session on your host PC use rsync to copy your cars 
+folder from the raspberry pi.
+```bash
+rsync -r pi@<your_pi_ip_address>:~/d2/data/  ~/d2/data/
 ```
 
-6. Now you can use rsync again to move your pilot back to your car. 
+
+## Train a model
+* In the same terminal you can now run the training script on the latest tub by passing the path to that tub as an argument. You can optionally pass path masks, such as `./data/*` or `./data/tub_?_17-08-28` to gather multiple tubs. For example:
+```bash
+ python ~/d2/manage.py train --tub <tub folder names comma separated> --model ./models/mypilot
 ```
-rsync ~/d2/models pi@<your_ip_address>:~/d2/models
+Optionally you can pass no arguments for the tub, and then all tubs will be used in the default data dir.
+```bash
+ python ~/d2/manage.py train --model ~/d2/models/mypilot
 ```
 
-7. Now you can start your car again and pass it your model to drive.
+
+* Now you can use rsync again to move your pilot back to your car. 
+```bash
+rsync -r ~/d2/models/ pi@<your_ip_address>:~/d2/models/
 ```
+
+* Now you can start your car again and pass it your model to drive.
+```bash
 python manage.py drive --model ~/d2/models/mypilot
 ```
 
@@ -55,10 +60,6 @@ python manage.py drive --model ~/d2/models/mypilot
 	
 	c. **Local Pilot** : This is where the trained model (mypilot) assumes control of both the steering and the throttle. As of now, it's purportedly not very reliable.
 	
-	d. **Auto Angle** : Same as Local Angle, except for it's relying on a model (pilot) running in a separate server. 
-	
-	e. **Auto Pilot** : Same as Local Pilot, but as you guessed, a remote model assumes control of both the steering and the throttle.
-
     Be sure to also check out the **Max Throttle** and **Throttle Mode** options, and play around with a few settings. Can help with training quite a lot. 
 
 2. **Build a Simple Track** : This isn't very well-documented, but the car should (theoretically) be able to train against any kind of track. To start off with, it might not be necessary to build a two-lane track with a striped center-lane. Try with a single lane with no center-line, or just a single strip that makes a circuit! At the least, you'll be able to do an end-to-end testing and verify that the software pipeline is all properly functional. Of course, as the next-step, you'll want to create a more standard track, and compete at a [meetup](https://diyrobocars.com/) nearest to you!
