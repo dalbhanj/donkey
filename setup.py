@@ -12,18 +12,17 @@ def package_files(directory, strip_leading):
     return paths
 
 car_templates=['templates/*']
-web_controller_html = package_files('donkeycar/parts/controllers/templates', 'donkeycar/')
-
+web_controller_html = package_files('donkeycar/parts/web_controller/templates', 'donkeycar/')
 
 extra_files = car_templates + web_controller_html
 print('extra_files', extra_files)
 
 
 setup(name='donkeycar',
-    version='2.1.3',
+    version='2.2.1',
     description='Self driving library for python.',
     url='https://github.com/wroscoe/donkey',
-    download_url='https://github.com/wroscoe/donkey/archive/2.1.2.1.tar.gz',
+    download_url='https://github.com/wroscoe/donkey/archive/2.1.5.tar.gz',
     author='Will Roscoe',
     author_email='wroscoe@gmail.com',
     license='MIT',
@@ -39,6 +38,11 @@ setup(name='donkeycar',
                       'requests',
                       'keras',
                       'h5py',
+                      'python-socketio',
+                      'flask',
+                      'eventlet',
+                      'moviepy',
+                      'pandas',
                      ],
 
     extras_require={

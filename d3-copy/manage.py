@@ -4,12 +4,15 @@ Scripts to drive a donkey 2 car and train a model for it.
 
 Usage:
     manage.py (drive) [--model=<model>] [--js]
+    manage.py (autodrive) [--model=<model>] [--js]
     manage.py (train) [--tub=<tub1,tub2,..tubn>]  (--model=<model>) [--no_cache]
 
 Options:
     -h --help        Show this screen.
     --tub TUBPATHS   List of paths to tubs. Comma separated. Use quotes to use wildcards. ie "~/tubs/*"
     --js             Use physical joystick.
+    --fix         Remove records which cause problems.
+    --no_cache    During training, load image repeatedly on each epoch
 """
 import os
 from docopt import docopt
@@ -128,6 +131,116 @@ def drive(cfg, model_path=None, use_joystick=False):
     
     print("You can now go to <your pi ip address>:8887 to drive your car.")
 
+def autodrive(cfg, model_path=None, use_joystick=False):
+    '''Initialize semi-autonomous driving with local_angle and custom throttle option
+    '''
+
+    #Initialize car
+    V = dk.vehicle.Vehicle()
+    cam = PiCamera(resolution=cfg.CAMERA_RESOLUTION)
+    V.add(cam, outputs=['cam/image_array'], threaded=True)
+    
+    if use_joystick or cfg.USE_JOYSTICK_AS_DEFAULT:
+        #modify max_throttle closer to 1.0 to have more power
+        #modify steering_scale lower than 1.0 to have less responsive steering
+        ctr = JoystickController(max_throttle=cfg.JOYSTICK_MAX_THROTTLE,
+                                 steering_scale=cfg.JOYSTICK_STEERING_SCALE,
+                                 auto_record_on_throttle=cfg.AUTO_RECORD_ON_THROTTLE)
+    else:        
+        #This web controller will create a web server that is capable
+        #of managing steering, throttle, and modes, and more.
+        ctr = LocalWebController()
+
+    V.add(ctr, 
+          inputs=['cam/image_array'],
+          outputs=['user/angle', 'user/throttle', 'user/mode', 'recording'],
+          threaded=True)
+    
+    #See if we should even run the pilot module. 
+    #This is only needed because the part run_condition only accepts boolean
+    def pilot_condition(mode):
+        if mode == 'user':
+            return False
+        else:
+            return True
+        
+    pilot_condition_part = Lambda(pilot_condition)
+    V.add(pilot_condition_part, inputs=['user/mode'], outputs=['run_pilot'])
+    
+    #Run the pilot if the mode is not user.
+    kl = KerasCategorical()
+    if model_path:
+        kl.load(model_path)
+    
+    V.add(kl, inputs=['cam/image_array'], 
+          outputs=['pilot/angle', 'pilot/throttle'],
+          run_condition='run_pilot')
+    
+    #Choose what inputs should change the car.
+    def drive_mode(mode, 
+                   user_angle, user_throttle,
+                   pilot_angle, pilot_throttle):
+
+        if mode == 'user': 
+            return user_angle, user_throttle
+        
+        elif mode == 'local_angle':
+            return pilot_angle, cfg.CONSTANT_THROTTLE
+        
+        else: 
+            return pilot_angle, pilot_throttle
+
+
+    #mode = cfg.MODE_CONFIG 
+
+    drive_mode_part = Lambda(drive_mode)
+    V.add(drive_mode_part, 
+          inputs=['user/mode', 'user/angle', 'user/throttle',
+                  'pilot/angle', 'pilot/throttle'], 
+          outputs=['angle', 'throttle'])
+    
+    
+    steering_controller = PCA9685(cfg.STEERING_CHANNEL)
+    steering = PWMSteering(controller=steering_controller,
+                                    left_pulse=cfg.STEERING_LEFT_PWM, 
+                                    right_pulse=cfg.STEERING_RIGHT_PWM)
+    
+    throttle_controller = PCA9685(cfg.THROTTLE_CHANNEL)
+    throttle = PWMThrottle(controller=throttle_controller,
+                                    max_pulse=cfg.THROTTLE_FORWARD_PWM,
+                                    zero_pulse=cfg.THROTTLE_STOPPED_PWM, 
+                                    min_pulse=cfg.THROTTLE_REVERSE_PWM)
+    
+    V.add(steering, inputs=['angle'])
+    V.add(throttle, inputs=['throttle'])
+    
+    #add tub to save data
+    inputs=['cam/image_array',
+            'user/angle', 'user/throttle', 
+            'pilot/angle', 'pilot/throttle', 
+            'user/mode']
+    types=['image_array',
+           'float', 'float',  
+           'float', 'float', 
+           'str']
+    
+    th = TubHandler(path=cfg.DATA_PATH)
+    tub = th.new_tub_writer(inputs=inputs, types=types)
+    V.add(tub, inputs=inputs, run_condition='recording')
+    
+    
+    # debugging inpots/outputs
+    #attrs = dir(V)
+    #print(attrs)
+    for items in V.parts:
+        print(items)
+
+
+    #run the vehicle for 20 seconds
+    V.start(rate_hz=cfg.DRIVE_LOOP_HZ, 
+            max_loop_count=cfg.MAX_LOOPS)
+    
+    print("You are now driving semi-autonomous using local_angle and constant throttle.")
 
 def train(cfg, tub_names, model_name):
     '''
@@ -175,6 +288,9 @@ if __name__ == '__main__':
     
     if args['drive']:
         drive(cfg, model_path = args['--model'], use_joystick=args['--js'])
+
+    elif args['autodrive']:
+        autodrive(cfg, model_path = args['--model'], use_joystick=args['--js'])
 
     elif args['train']:
         tub = args['--tub']
