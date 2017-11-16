@@ -21,7 +21,7 @@ import tornado.ioloop
 import tornado.web
 import tornado.gen
 
-'''from ... import utils'''
+from ... import utils
 
 
 class RemoteWebServer():
@@ -36,7 +36,7 @@ class RemoteWebServer():
         self.time = 0.
         self.angle = 0.
         self.throttle = 0.
-        self.mode = 'user'
+        self.mode = 'local_angle'
         self.recording = False
         #use one session for all requests
         self.session = requests.Session()
@@ -114,7 +114,7 @@ class LocalWebController(tornado.web.Application):
         
         self.angle = 0.0
         self.throttle = 0.0
-        self.mode = 'user'
+        self.mode = 'local_angle'
         self.recording = False
 
         handlers = [
