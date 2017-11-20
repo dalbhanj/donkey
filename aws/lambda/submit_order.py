@@ -14,11 +14,11 @@ logger.setLevel(logging.INFO)
 def respond(err, res=None):
     return {
         'statusCode': '400' if err else '200',
-        'body': err if err else res,
+        'body': err if err else json.dumps(res),
         'headers': {
             'Content-Type': 'application/json',
-            'Access-Control-Allow-Origin': '*'
-        }
+            'Access-Control-Allow-Origin': '*',
+        },
     }
 
 def lambda_handler(event, context):
@@ -57,12 +57,12 @@ def lambda_handler(event, context):
             Item=payload
         )
         return respond(None, "Order successfully submitted")
-    except KeyError as exc:
-        logger.error(exc)
-        return respond("Missing key " + str(exc))
-    except TypeError as exc:
-        logger.error(exc)
-        return respond("Type error " + str(exc))
-    except Exception as exc:
-        logger.error(exc)
-        return respond("Unknown error " + str(exc))
+    except KeyError as e:
+        logger.error(e)
+        return respond("Missing key {}".format(e))
+    except TypeError as e:
+        logger.error(e)
+        return respond("Type error {}".format(e))
+    except Exception as e:
+        logger.error(e)
+        return respond("Unknown error {}".format(e))

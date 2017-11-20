@@ -29,7 +29,7 @@ function getData() {
                 orders.push(order);
             }
             orders.sort(function (a, b) {
-                return b.OrderId.localeCompare(a.OrderId);
+                return a.OrderId.localeCompare(b.OrderId);
             });
             dynatable.settings.dataset.originalRecords = orders;
             dynatable.process();

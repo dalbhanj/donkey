@@ -11,20 +11,11 @@ function sendOrder() {
     })
     console.log(order)
 
-    // Send to API gateway->Lambda->IoT
-    // TODO: Success/error is not firing correctly but the data is moving through system
-/*     $.ajax({
-        method: 'POST',
-        url: _config.api.invokeUrl + '/order',
-        data: order,
-        contentType: 'application/json',
-        success: completeRequest
-    }); */
     var jqxhr = $.post(_config.api.invokeUrl + '/order', order)
-        .done(function () {
+        .done(function (data) {
             alert("Order successful! Waiterbot is on the way!");
         })
-        .fail(function () {
+        .fail(function (data) {
             console.log("Error submitting order");
         });
 }
