@@ -214,6 +214,21 @@ def autodrive(cfg, model_path=None, use_joystick=False):
     V.add(steering, inputs=['angle'])
     V.add(throttle, inputs=['throttle'])
     
+    #Check for Keyboard interrupts and change keyboard_condition to True
+    keypress = _GetCh()
+    V.add(keypress, inputs=[], 
+                    outputs=['keypress_mode', 'throttle'], threaded=True)
+
+    def keyboard_condition(keypress_mode):
+        if keypress_mode == 'pause':
+            #print('keypress_mode set to pause')
+            return True
+        else:
+            return False
+        
+    keyboard_condition_part = Lambda(keyboard_condition)
+    V.add(keyboard_condition_part, inputs=['keypress_mode'], outputs=['keypress_condition'])
+    
     #add tub to save data
     inputs=['cam/image_array',
             'user/angle', 'user/throttle', 
