@@ -156,7 +156,7 @@ def autodrive(cfg, model_path=None, use_joystick=False):
           inputs=['cam/image_array'],
           outputs=['user/angle', 'user/throttle', 'user/mode', 'recording'],
           threaded=True)
-    
+
     #See if we should even run the pilot module. 
     #This is only needed because the part run_condition only accepts boolean
     def pilot_condition(mode):
@@ -167,7 +167,6 @@ def autodrive(cfg, model_path=None, use_joystick=False):
         
     pilot_condition_part = Lambda(pilot_condition)
     V.add(pilot_condition_part, inputs=['user/mode'], outputs=['run_pilot'])
-
 
     #Run the pilot if the mode is not user.
     kl = KerasCategorical()
@@ -215,9 +214,20 @@ def autodrive(cfg, model_path=None, use_joystick=False):
     V.add(throttle, inputs=['throttle'])
 
 
-    #Check for Keyboard interrupts and take action if its True
+    #Check for Keyboard interrupts and change keyboard_condition to True
     keypress = _GetCh()
-    V.add(keypress, inputs=['angle', 'throttle'], outputs=['angle', 'throttle'], threaded=True)
+    V.add(keypress, inputs=[], 
+                    outputs=['keypress_mode', 'throttle'], threaded=True)
+
+    def keyboard_condition(keypress_mode):
+        if keypress_mode == 'pause':
+            #print('keypress_mode set to pause')
+            return True
+        else:
+            return False
+        
+    keyboard_condition_part = Lambda(keyboard_condition)
+    V.add(keyboard_condition_part, inputs=['keypress_mode'], outputs=['keypress_condition'])
     
     #add tub to save data
     inputs=['cam/image_array',

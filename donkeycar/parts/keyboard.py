@@ -6,6 +6,8 @@ screen."""
     def __init__(self):
         self.angle = 0.0
         self.throttle = 0.2
+        self.keypress_mode=None
+        #self.keypress_condition=False
         LEFT_ANGLE_X = 0.7
         THROTTLE_TIME_X = 5
         RIGHT_ANGLE_Y = 0.8
@@ -40,18 +42,12 @@ screen."""
         c = InKey()        
         while c != 3:
           if c == 32:
-            print("keyboard interrupted")
+            self.keypress_mode='pause'
             self.throttle=0.0
-            print("throttle =", self.throttle)
+            print("throttle =", self.throttle, "keypress_mode = ", self.keypress_mode)
           elif c == 51:
             print("doing 3-point turn")
             self.throttle=0.0
-            # while time <= time.sleep(5):
-            #   angle=LEFT_ANGLE_X
-            #   print(angle)
-            #   time.sleep(.5)
-            #   self.throttle=0.2
-            #   print(throttle)
           else:
             print(c)
             self.throttle=0.2
@@ -59,8 +55,8 @@ screen."""
           c = InKey()
 
 
-    def run_threaded(self, angle, throttle):
-        return self.angle, self.throttle
+    def run_threaded(self):
+        return self.keypress_mode, self.throttle
 
 
 class _GetChWindows:

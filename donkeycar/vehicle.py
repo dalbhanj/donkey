@@ -23,7 +23,7 @@ class Vehicle():
 
 
     def add(self, part, inputs=[], outputs=[], 
-            threaded=False, run_condition=None):
+            threaded=False, run_condition=None, keypress_condition=False):
         """
         Method to add a part to the vehicle drive loop.
 
@@ -43,6 +43,7 @@ class Vehicle():
         entry['part'] = p
         entry['inputs'] = inputs
         entry['outputs'] = outputs
+        entry['keypress_condition'] = keypress_condition
         entry['run_condition'] = run_condition
 
         if threaded:
@@ -113,19 +114,22 @@ class Vehicle():
         for entry in self.parts:
             #don't run if there is a run condition that is False
             run = True
+            pause = False
             if entry.get('run_condition'):
                 run_condition = entry.get('run_condition')
                 run = self.mem.get([run_condition])[0]
                 #print('run_condition', entry['part'], entry.get('run_condition'), run)
-            
+
             if run:
                 p = entry['part']
                 #get inputs from memory
                 inputs = self.mem.get(entry['inputs'])
+                #print(self.mem.d)
 
                 #run the part
                 if entry.get('thread'):
                     outputs = p.run_threaded(*inputs)
+                    #print(self.mem.d)
                 else:
                     outputs = p.run(*inputs)
 
@@ -133,7 +137,30 @@ class Vehicle():
                 if outputs is not None:
                     self.mem.put(entry['outputs'], outputs)
 
-                    
+    # def pause(self):
+    #         #don't run if there is a keyboard condition that is False
+    #         #run = True
+    #         pause = True
+    #         if entry.get('keypress_condition'):
+    #             keypress_condition = entry.get('keypress_condition')
+    #             pause = self.mem.get([keypress_condition])[0]       
+
+    #         if pause:
+    #             p = entry['part']
+    #             #get inputs from memory
+    #             inputs = self.mem.get(entry['inputs'])
+    #             #print(self.mem.d)
+
+    #             #run the part
+    #             if entry.get('thread'):
+    #                 outputs = p.run_threaded(*inputs)
+    #                 #print(self.mem.d)
+    #             else:
+    #                 outputs = p.run(*inputs)
+
+    #             #save the output to memory
+    #             if outputs is not None:
+    #                 self.mem.put(entry['outputs'], outputs)
 
     def stop(self):
         print('Shutting down vehicle and its parts...')
