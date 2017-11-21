@@ -22,8 +22,10 @@ class Vehicle():
         self.threads = []
 
 
+    # def add(self, part, inputs=[], outputs=[], 
+    #         threaded=False, run_condition=None, keypress_condition=False):
     def add(self, part, inputs=[], outputs=[], 
-            threaded=False, run_condition=None, keypress_condition=False):
+            threaded=False, run_condition=None):
         """
         Method to add a part to the vehicle drive loop.
 
@@ -43,7 +45,7 @@ class Vehicle():
         entry['part'] = p
         entry['inputs'] = inputs
         entry['outputs'] = outputs
-        entry['keypress_condition'] = keypress_condition
+        #entry['keypress_condition'] = keypress_condition
         entry['run_condition'] = run_condition
 
         if threaded:

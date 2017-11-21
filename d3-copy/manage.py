@@ -176,8 +176,13 @@ def autodrive(cfg, model_path=None, use_joystick=False):
           outputs=['pilot/angle', 'pilot/throttle'],
           run_condition='run_pilot')
     
+    #Check for Keyboard interrupts and change keyboard_condition to True
+    keypress = _GetCh()
+    V.add(keypress, inputs=[], 
+                    outputs=['keypress_mode', 'throttle'], threaded=True)
+
     #Choose what inputs should change the car.
-    def drive_mode(mode, 
+    def drive_mode(mode, keypress_mode,
                    user_angle, user_throttle,
                    pilot_angle, pilot_throttle):
 
@@ -187,15 +192,16 @@ def autodrive(cfg, model_path=None, use_joystick=False):
         elif mode == 'local_angle':
             return pilot_angle, cfg.CONSTANT_THROTTLE
         
+        elif mode == 'local_angle' and keypress_mode == 'pause':
+            return pilot_angle, user_throttle            
+
         else: 
             return pilot_angle, pilot_throttle
 
 
-    #mode = cfg.MODE_CONFIG 
-
     drive_mode_part = Lambda(drive_mode)
     V.add(drive_mode_part, 
-          inputs=['user/mode', 'user/angle', 'user/throttle',
+          inputs=['user/mode','keypress/mode', 'user/angle', 'user/throttle',
                   'pilot/angle', 'pilot/throttle'], 
           outputs=['angle', 'throttle'])
     
@@ -214,21 +220,7 @@ def autodrive(cfg, model_path=None, use_joystick=False):
     V.add(steering, inputs=['angle'])
     V.add(throttle, inputs=['throttle'])
     
-    #Check for Keyboard interrupts and change keyboard_condition to True
-    keypress = _GetCh()
-    V.add(keypress, inputs=[], 
-                    outputs=['keypress_mode', 'throttle'], threaded=True)
 
-    def keyboard_condition(keypress_mode):
-        if keypress_mode == 'pause':
-            #print('keypress_mode set to pause')
-            return True
-        else:
-            return False
-        
-    keyboard_condition_part = Lambda(keyboard_condition)
-    V.add(keyboard_condition_part, inputs=['keypress_mode'], outputs=['keypress_condition'])
-    
     #add tub to save data
     inputs=['cam/image_array',
             'user/angle', 'user/throttle', 
