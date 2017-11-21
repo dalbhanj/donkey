@@ -52,7 +52,7 @@ def lambda_handler(event, context):
             'state':{
                 'desired':{
                     'current_order': "0",
-                    'destination': "0",
+                    'destination': 0,
                 }
             }
         })

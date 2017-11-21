@@ -86,7 +86,7 @@ class IotClient:
                 self.shadow['state']['reported']['location'] = -1 # -1 for moving
                 self.shadow['state']['reported']['destination'] = desired_state['destination']
                 self.shadow['state']['reported']['current_order'] = desired_state['current_order']
-                print("Model # to use: " + model)
+                print("Model # to use: " + str(model))
                 print("Current shadow: " + str(self.shadow))
             elif desired_state['destination'] is 0: # going back to kitchen
                 # The same model we used to get to the table we use to get back to the kitchen
@@ -95,7 +95,7 @@ class IotClient:
                 self.shadow['state']['reported']['location'] = -1 # -1 for moving
                 self.shadow['state']['reported']['destination'] = desired_state['destination']
                 self.shadow['state']['reported']['current_order'] = desired_state['current_order']
-                print("Model # to use: " + model)
+                print("Model # to use: " + str(model))
                 print("Current shadow: " + str(self.shadow))
         
         print("+++++++++++++++++++++++\n\n")

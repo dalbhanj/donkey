@@ -67,7 +67,7 @@ def fulfill_order(order_id):
             'state':{
                 'desired':{
                     'current_order': order_id,
-                    'destination': table,
+                    'destination': int(table),
                 }
             }
         })
