@@ -15,7 +15,11 @@ Options:
     --no_cache    During training, load image repeatedly on each epoch
 """
 import os
+import time
 from docopt import docopt
+from AWSIoTPythonSDK import MQTTLib
+from AWSIoTPythonSDK.MQTTLib import AWSIoTMQTTClient
+from AWSIoTPythonSDK.MQTTLib import AWSIoTMQTTShadowClient
 
 import donkeycar as dk
 
@@ -28,6 +32,20 @@ from donkeycar.parts.datastore import TubHandler, TubGroup
 from donkeycar.parts.controller import LocalWebController, JoystickController
 from donkeycar.parts.keyboard import _GetCh
 
+def request_callback(client, userdata, message):
+    print("Received request from IoT")
+    print(message.payload)
+    
+    model = message.payload['destination']
+    
+    # k1.load(model)
+    # V.add(kl, inputs=['cam/image_array'], 
+    #    outputs=['pilot/angle', 'pilot/throttle'], 
+    #    run_condition='run_pilot'
+    # )
+    # V.start(rate_hz=cfg.DRIVE_LOOP_HZ, 
+    #        max_loop_count=cfg.MAX_LOOPS)
+    
 
 
 def drive(cfg, model_path=None, use_joystick=False):

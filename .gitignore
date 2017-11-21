@@ -1,6 +1,8 @@
 env/*
 data/*
 dist/*
+*.pem
+*.key
 *.pyc
 .ipynb_checkpoints
 *.egg-info/
@@ -12,3 +14,5 @@ lag_log.csv
 site/*
 build
 .idea
+.vscode
+.editorconfig

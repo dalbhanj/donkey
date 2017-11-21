@@ -52,14 +52,25 @@ def fulfill_order(order_id):
 
     # Send a message to IoT to tell Waiterbot to deliver order
     logger.info("Sending Waiterbot to table %s", table)
-    payload = json.dumps({
-        'destination': table,
-        'current_order': order_id,
-    })
-    iot_data.publish(
-        topic='req/waiterbot/v1/deliver/bot1',
-        qos=1,
-        payload=payload
+    # payload = json.dumps({
+    #     'destination': table,
+    #     'current_order': order_id,
+    # })
+    # iot_data.publish(
+    #     topic='req/waiterbot/v1/deliver/+',
+    #     qos=1,
+    #     payload=payload
+    # )
+    iot_data.update_thing_shadow(
+        thingName=os.environ['Thing_Name'],
+        payload=json.dumps({
+            'state':{
+                'desired':{
+                    'current_order': order_id,
+                    'destination': table,
+                }
+            }
+        })
     )
 
 def lambda_handler(event, context):

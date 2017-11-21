@@ -1,0 +1,82 @@
+Request order delivery from fulfillment api to rover.
+Also used to send rover back to kitchen after delivery
+    topic: req/waiterbot/v1/deliver/+
+    format:
+    {
+        "destination": 0,1,2,3,4,... 0 for kitchen, 1-4 for table number, -1 for moving
+        "current_order": ... 0 for return to kitchen, order id for order currently being fulfilled
+    }
+Response for order delivery from rover button to rover control lambda
+    topic: res/waiterbot/v1/deliver/+
+    format:
+    {
+        "table":
+        "order_id":
+        "delivery_time": 
+    }
+
+Waiterbot shadow document
+{
+    "location": 0,1,2,3,4... 0 for kitchen, 1-4 for table number, -1 for moving
+    "destination": 0,1,2,3,4... 0 for kitchen, 1-4 for table number
+    "current_order": ... order id for order currently being fulfilled
+}
+
+---------------Rover Interaction State Machine-----------------
+Rover idle in kitchen. Order is placed on rover. 
+    current shadow:
+        {
+            "location": 0,
+            "destination": 0,
+            "current_order": "0"
+        }
+Kitchen staff clicks 'Fulfill Order' button on dashboard.
+    topic: req/waiterbot/v1/deliver/bot1
+    format:
+        {
+            "destination": 1,
+            "current_order": "1510954938.238744"
+        }
+Rover goes to table. No response message.
+    current shadow:
+        {
+            "location": -1,
+            "destination": 1,
+            "current_order": "1510954938.238744"
+        }
+Rover gets to table, spins around to face towards home. 
+    current shadow:
+        {
+            "location": 1,
+            "destination": 1,
+            "current_order": "1510954938.238744"
+        }
+Customer presses button to signal delivery. Button Lambda sends (go home and tell me what you just did).
+    topic: req/waiterbot/v1/deliver/bot1
+    format:
+        {
+            "destination": 0,
+            "current_order": "0"
+        }
+Rover receives previous message. Sends in response.
+    topic: res/waiterbot/v1/deliver/+
+    format:
+        {
+            "table": 1,
+            "order_id": "1510954938.238744",
+            "delivery_time": "1510955000.238744"
+        }
+After sending response message.
+    current shadow:
+        {
+            "location": -1,
+            "destination": 0,
+            "current_order": "0"
+        }
+Rover travels back to kitchen, spins around to face exit. Rover ready for next order.
+    current shadow:
+        {
+            "location": 0,
+            "destination": 0,
+            "current_order": "0"
+        }
