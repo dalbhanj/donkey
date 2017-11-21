@@ -156,16 +156,25 @@ def autodrive(cfg, model_path=None, use_joystick=False):
           outputs=['user/angle', 'user/throttle', 'user/mode', 'recording'],
           threaded=True)
     
+    #Check for Keyboard interrupts and change keyboard_condition to True
+    keypress = _GetCh()
+    V.add(keypress, inputs=[], 
+                    outputs=['keypress_mode', 'throttle'], threaded=True)
+
     #See if we should even run the pilot module. 
     #This is only needed because the part run_condition only accepts boolean
-    def pilot_condition(mode):
+    def pilot_condition(mode, keypress_mode):
         if mode == 'user':
             return False
+
+        elif mode == 'local_angle' and keypress_mode == 'pause':
+            return False
+
         else:
             return True
         
     pilot_condition_part = Lambda(pilot_condition)
-    V.add(pilot_condition_part, inputs=['user/mode'], outputs=['run_pilot'])
+    V.add(pilot_condition_part, inputs=['user/mode', 'keypress/mode'], outputs=['run_pilot'])
     
     #Run the pilot if the mode is not user.
     kl = KerasCategorical()
@@ -175,14 +184,9 @@ def autodrive(cfg, model_path=None, use_joystick=False):
     V.add(kl, inputs=['cam/image_array'], 
           outputs=['pilot/angle', 'pilot/throttle'],
           run_condition='run_pilot')
-    
-    #Check for Keyboard interrupts and change keyboard_condition to True
-    keypress = _GetCh()
-    V.add(keypress, inputs=[], 
-                    outputs=['keypress_mode', 'throttle'], threaded=True)
 
     #Choose what inputs should change the car.
-    def drive_mode(mode, keypress_mode,
+    def drive_mode(mode,
                    user_angle, user_throttle,
                    pilot_angle, pilot_throttle):
 
@@ -190,10 +194,7 @@ def autodrive(cfg, model_path=None, use_joystick=False):
             return user_angle, user_throttle
         
         elif mode == 'local_angle':
-            return pilot_angle, cfg.CONSTANT_THROTTLE
-        
-        elif mode == 'local_angle' and keypress_mode == 'pause':
-            return pilot_angle, user_throttle            
+            return pilot_angle, cfg.CONSTANT_THROTTLE 
 
         else: 
             return pilot_angle, pilot_throttle
@@ -201,7 +202,7 @@ def autodrive(cfg, model_path=None, use_joystick=False):
 
     drive_mode_part = Lambda(drive_mode)
     V.add(drive_mode_part, 
-          inputs=['user/mode','keypress/mode', 'user/angle', 'user/throttle',
+          inputs=['user/mode', 'user/angle', 'user/throttle',
                   'pilot/angle', 'pilot/throttle'], 
           outputs=['angle', 'throttle'])
     

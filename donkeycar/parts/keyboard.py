@@ -5,7 +5,7 @@ class _GetCh:
 screen."""
     def __init__(self):
         self.angle = 0.0
-        self.throttle = 0.2
+        self.throttle = 0.25
         self.keypress_mode=None
         #self.keypress_condition=False
         LEFT_ANGLE_X = 0.7
@@ -50,7 +50,7 @@ screen."""
             self.throttle=0.0
           else:
             print(c)
-            self.throttle=0.2
+            self.throttle=0.25
             print("throttle =", self.throttle)            
           c = InKey()
 
