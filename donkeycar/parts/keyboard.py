@@ -43,20 +43,18 @@ screen."""
         while c != 3:
           if c == 32:
             self.keypress_mode='pause'
-            self.throttle=0.0
-            print("throttle =", self.throttle, "keypress_mode = ", self.keypress_mode)
+            print("keypress_mode = ", self.keypress_mode)
           elif c == 51:
             print("doing 3-point turn")
-            self.throttle=0.0
           else:
+            self.keypress_mode='run'
             print(c)
-            self.throttle=0.25
-            print("throttle =", self.throttle)            
+            print("keypress_mode = ", self.keypress_mode)            
           c = InKey()
 
 
     def run_threaded(self):
-        return self.keypress_mode, self.throttle
+        return self.keypress_mode
 
 
 class _GetChWindows:

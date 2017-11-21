@@ -160,22 +160,19 @@ def autodrive(cfg, model_path=None, use_joystick=False):
     #Check for Keyboard interrupts and change keyboard_condition to True
     keypress = _GetCh()
     V.add(keypress, inputs=[], 
-                    outputs=['keypress_mode', 'throttle'], threaded=True)
+                    outputs=['keypress_mode'], threaded=True)
 
     #See if we should even run the pilot module. 
     #This is only needed because the part run_condition only accepts boolean
-    def pilot_condition(mode, keypress_mode):
+    def pilot_condition(mode):
         if mode == 'user':
-            return False
-
-        elif mode == 'local_angle' and keypress_mode == 'pause':
             return False
 
         else:
             return True
         
     pilot_condition_part = Lambda(pilot_condition)
-    V.add(pilot_condition_part, inputs=['user/mode', 'keypress/mode'], outputs=['run_pilot'])
+    V.add(pilot_condition_part, inputs=['user/mode'], outputs=['run_pilot'])
     
     #Run the pilot if the mode is not user.
     kl = KerasCategorical()
@@ -206,7 +203,7 @@ def autodrive(cfg, model_path=None, use_joystick=False):
           inputs=['user/mode', 'user/angle', 'user/throttle',
                   'pilot/angle', 'pilot/throttle'], 
           outputs=['angle', 'throttle'])
-    
+
     
     steering_controller = MockController(cfg.STEERING_CHANNEL)
     steering = PWMSteering(controller=steering_controller,

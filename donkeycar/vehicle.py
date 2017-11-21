@@ -88,26 +88,48 @@ class Vehicle():
             print('Starting vehicle...')
             time.sleep(1)
 
-            loop_count = 0
-            while self.on:
-                start_time = time.time()
-                loop_count += 1
+            self.update_parts()
+            self.run()
+            # loop_count = 0
+            # while self.on:
+            #     start_time = time.time()
+            #     loop_count += 1
 
-                self.update_parts()
+            #     #self.update_parts()
 
-                #stop drive loop if loop_count exceeds max_loopcount
-                if max_loop_count and loop_count > max_loop_count:
-                    self.on = False
+            #     #stop drive loop if loop_count exceeds max_loopcount
+            #     if max_loop_count and loop_count > max_loop_count:
+            #         self.on = False
 
-                sleep_time = 1.0 / rate_hz - (time.time() - start_time)
-                if sleep_time > 0.0:
-                    time.sleep(sleep_time)
+            #     sleep_time = 1.0 / rate_hz - (time.time() - start_time)
+            #     if sleep_time > 0.0:
+            #         time.sleep(sleep_time)
 
         except KeyboardInterrupt:
             pass
         finally:
             self.stop()
 
+    def run(self, rate_hz=10, max_loop_count=None):
+        '''
+        just run the drive loop 
+        '''
+        loop_count = 0
+        self.running = True
+
+        while self.running:
+            start_time = time.time()            
+            loop_count += 1
+
+            #self.update_parts()
+
+            #stop drive loop if loop_count exceeds max_loopcount
+            if max_loop_count and loop_count > max_loop_count:
+                self.running = False
+
+            sleep_time = 1.0 / rate_hz - (time.time() - start_time)
+            if sleep_time > 0.0:
+                time.sleep(sleep_time)     
 
     def update_parts(self):
         '''
