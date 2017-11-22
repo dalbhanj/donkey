@@ -136,13 +136,13 @@ class Vehicle():
         print("Performing three point turn")
         steering = self.get("PWMSteering")
         throttle = self.get("PWMThrottle")
-        turn_duration = 100
+        turn_duration = 15
 
         # Perform the first point of the turn
-        steering.run(1)
+        steering.run(-1)
         count = 0
         while count < turn_duration:
-            throttle.run(.25)
+            throttle.run(-.25)
 
     def update_parts(self):
         '''
