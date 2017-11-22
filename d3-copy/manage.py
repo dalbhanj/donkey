@@ -263,7 +263,7 @@ def autodrive(cfg, model_path=None, use_joystick=False):
             keypress_mode='run'
             print ("keypress_mode = ", keypress_mode)
             #V.update_parts()
-      c = InKey()
+        c = InKey()
     except KeyboardInterrupt: 
         print('pausing')
         V.pause()
