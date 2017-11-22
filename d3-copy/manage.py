@@ -137,7 +137,7 @@ def autodrive(cfg, model_path=None, use_joystick=False):
 
     #Initialize car
     V = dk.vehicle.Vehicle()
-    cam = PiCamera(resolution=cfg.CAMERA_RESOLUTION)
+    cam = MockCamera(resolution=cfg.CAMERA_RESOLUTION)
     V.add(cam, outputs=['cam/image_array'], threaded=True)
     
     if use_joystick or cfg.USE_JOYSTICK_AS_DEFAULT:
@@ -155,26 +155,18 @@ def autodrive(cfg, model_path=None, use_joystick=False):
           inputs=['cam/image_array'],
           outputs=['user/angle', 'user/throttle', 'user/mode', 'recording'],
           threaded=True)
-    
-    #Check for Keyboard interrupts and change keyboard_condition to True
-    keypress = _GetCh()
-    V.add(keypress, inputs=[], 
-                    outputs=['keypress_mode', 'throttle'], threaded=True)
 
     #See if we should even run the pilot module. 
     #This is only needed because the part run_condition only accepts boolean
-    def pilot_condition(mode, keypress_mode):
+    def pilot_condition(mode):
         if mode == 'user':
-            return False
-
-        elif mode == 'local_angle' and keypress_mode == 'pause':
             return False
 
         else:
             return True
         
     pilot_condition_part = Lambda(pilot_condition)
-    V.add(pilot_condition_part, inputs=['user/mode', 'keypress/mode'], outputs=['run_pilot'])
+    V.add(pilot_condition_part, inputs=['user/mode'], outputs=['run_pilot'])
     
     #Run the pilot if the mode is not user.
     kl = KerasCategorical()
@@ -205,14 +197,14 @@ def autodrive(cfg, model_path=None, use_joystick=False):
           inputs=['user/mode', 'user/angle', 'user/throttle',
                   'pilot/angle', 'pilot/throttle'], 
           outputs=['angle', 'throttle'])
+
     
-    
-    steering_controller = PCA9685(cfg.STEERING_CHANNEL)
+    steering_controller = MockController(cfg.STEERING_CHANNEL)
     steering = PWMSteering(controller=steering_controller,
                                     left_pulse=cfg.STEERING_LEFT_PWM, 
                                     right_pulse=cfg.STEERING_RIGHT_PWM)
     
-    throttle_controller = PCA9685(cfg.THROTTLE_CHANNEL)
+    throttle_controller = MockController(cfg.THROTTLE_CHANNEL)
     throttle = PWMThrottle(controller=throttle_controller,
                                     max_pulse=cfg.THROTTLE_FORWARD_PWM,
                                     zero_pulse=cfg.THROTTLE_STOPPED_PWM, 
@@ -220,7 +212,6 @@ def autodrive(cfg, model_path=None, use_joystick=False):
     
     V.add(steering, inputs=['angle'])
     V.add(throttle, inputs=['throttle'])
-    
 
     #add tub to save data
     inputs=['cam/image_array',
@@ -243,11 +234,30 @@ def autodrive(cfg, model_path=None, use_joystick=False):
     for items in V.parts:
         print(items)
 
+    #Start the vehicle and add the parts
+    V.start()
+    V.update_parts()
 
-    #run the vehicle for 20 seconds
-    V.start(rate_hz=cfg.DRIVE_LOOP_HZ, 
-            max_loop_count=cfg.MAX_LOOPS)
-    
+    InKey = _GetCh()
+
+    print('Press Ctrl-C to exit')
+
+    c = InKey()
+    while c != 3:
+        try:
+          if c == 32:
+            keypress_mode='pause'
+            print("keypress_mode = ", keypress_mode)
+            V.pause()
+          elif c == 51:
+            print("doing 3-point turn")
+          else:
+            keypress_mode='run'
+            print ("keypress_mode = ", keypress_mode)
+          c = InKey()
+        except KeyboardInterrupt: 
+            V.pause()
+
     print("You are now driving semi-autonomous using local_angle and constant throttle.")
 
 def train(cfg, tub_names, model_name):

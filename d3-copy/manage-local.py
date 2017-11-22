@@ -26,7 +26,7 @@ from donkeycar.parts.keras import KerasCategorical
 from donkeycar.parts.actuator import PCA9685, PWMSteering, PWMThrottle, MockController
 from donkeycar.parts.datastore import TubHandler, TubGroup
 from donkeycar.parts.controller import LocalWebController, JoystickController
-from donkeycar.parts.keyboard import _GetCh
+from donkeycar.parts.keyboard import _GetCh, _GetChUnix
 
 
 
@@ -157,11 +157,6 @@ def autodrive(cfg, model_path=None, use_joystick=False):
           outputs=['user/angle', 'user/throttle', 'user/mode', 'recording'],
           threaded=True)
 
-    #Check for Keyboard interrupts and change keyboard_condition to True
-    keypress = _GetCh()
-    V.add(keypress, inputs=[], 
-                    outputs=['keypress_mode'], threaded=True)
-
     #See if we should even run the pilot module. 
     #This is only needed because the part run_condition only accepts boolean
     def pilot_condition(mode):
@@ -219,17 +214,6 @@ def autodrive(cfg, model_path=None, use_joystick=False):
     V.add(steering, inputs=['angle'])
     V.add(throttle, inputs=['throttle'])
 
-    # def keyboard_condition(keypress_mode, mode):
-    #     if keypress_mode == 'pause' and mode == 'local_angle':
-    #         #print('keypress_mode set to pause')
-    #         return user_angle, user_throttle
-    #         #return True
-    #     else:
-    #         return False
-        
-    # keyboard_condition_part = Lambda(keyboard_condition)
-    # V.add(keyboard_condition_part, inputs=['keypress_mode', 'user/mode'], outputs=['angle', 'throttle'])
-    
     #add tub to save data
     inputs=['cam/image_array',
             'user/angle', 'user/throttle', 
@@ -251,11 +235,30 @@ def autodrive(cfg, model_path=None, use_joystick=False):
     for items in V.parts:
         print(items)
 
+    #Start the vehicle and add the parts
+    V.start()
+    V.update_parts()
 
-    #run the vehicle for 20 seconds
-    V.start(rate_hz=cfg.DRIVE_LOOP_HZ, 
-            max_loop_count=cfg.MAX_LOOPS)
-    
+    InKey = _GetCh()
+
+    print('Press Ctrl-C to exit')
+
+    c = InKey()
+    while c != 3:
+        try:
+          if c == 32:
+            keypress_mode='pause'
+            print("keypress_mode = ", keypress_mode)
+            V.pause()
+          elif c == 51:
+            print("doing 3-point turn")
+          else:
+            keypress_mode='run'
+            print ("keypress_mode = ", keypress_mode)
+          c = InKey()
+        except KeyboardInterrupt: 
+            V.pause()
+
     print("You are now driving semi-autonomous using local_angle and constant throttle.")
 
 def train(cfg, tub_names, model_name):
