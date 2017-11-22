@@ -21,10 +21,7 @@ class Vehicle():
         self.on = True
         self.threads = []
 
-
-    # def add(self, part, inputs=[], outputs=[], 
-    #         threaded=False, run_condition=None, keypress_condition=False):
-    def add(self, part, inputs=[], outputs=[], 
+    def add(self, part, inputs=[], outputs=[],
             threaded=False, run_condition=None):
         """
         Method to add a part to the vehicle drive loop.
@@ -45,7 +42,6 @@ class Vehicle():
         entry['part'] = p
         entry['inputs'] = inputs
         entry['outputs'] = outputs
-        #entry['keypress_condition'] = keypress_condition
         entry['run_condition'] = run_condition
 
         if threaded:
@@ -62,9 +58,8 @@ class Vehicle():
         '''
         for entry in self.parts:
             if entry['part'].__class__.__name__ is part_name:
-                print("Returning part " + part_name)
+                #print("Returning part " + part_name)
                 return entry['part']
-
 
     def start(self):
         """
@@ -86,7 +81,6 @@ class Vehicle():
         """
 
         try:
-
             self.on = True
 
             for entry in self.parts:
@@ -94,33 +88,14 @@ class Vehicle():
                     #start the update thread
                     entry.get('thread').start()
 
-            #wait until the parts warm up.
             print('Starting vehicle...')
             time.sleep(1)
-
-            #self.update_parts()
-            #self.run()
-            # loop_count = 0
-            # while self.on:
-            #     start_time = time.time()
-            #     loop_count += 1
-
-            #     #self.update_parts()
-
-            #     #stop drive loop if loop_count exceeds max_loopcount
-            #     if max_loop_count and loop_count > max_loop_count:
-            #         self.on = False
-
-            #     sleep_time = 1.0 / rate_hz - (time.time() - start_time)
-            #     if sleep_time > 0.0:
-            #         time.sleep(sleep_time)
-
         except KeyboardInterrupt:
             pass
 
     def run(self, rate_hz=10, max_loop_count=None):
         '''
-        just run the drive loop 
+        just run the drive loop
         '''
         loop_count = 0
         self.running = True
@@ -141,6 +116,9 @@ class Vehicle():
         return self.running
 
     def pause(self):
+        '''
+        Shutdown (set to zero) the throttle and steering
+        '''
         print('Vehicle is stopped')
         for entry in self.parts:
             if entry['part'].__class__.__name__ is "PWMThrottle":
@@ -150,6 +128,21 @@ class Vehicle():
                 print("Shutting down Steering")
                 entry['part'].shutdown()
 
+    def three_point_turn(self):
+        '''
+        **Description**
+        Make the rover perform a three point turn so it's facing 180 degrees from start
+        '''
+        print("Performing three point turn")
+        steering = self.get("PWMSteering")
+        throttle = self.get("PWMThrottle")
+        turn_duration = 100
+
+        # Perform the first point of the turn
+        steering.run(1)
+        count = 0
+        while count < turn_duration:
+            throttle.run(.25)
 
     def update_parts(self):
         '''
@@ -181,8 +174,10 @@ class Vehicle():
                 if outputs is not None:
                     self.mem.put(entry['outputs'], outputs)
 
-
     def stop(self):
+        '''
+        Shutdown the entire vehicle
+        '''
         print('Shutting down vehicle and its parts...')
         for entry in self.parts:
             try:

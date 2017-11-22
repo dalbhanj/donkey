@@ -207,20 +207,6 @@ def autodrive(cfg, model_path=None):
     V.add(steering, inputs=['angle'])
     V.add(throttle, inputs=['throttle'])
 
-    # #add tub to save data
-    # inputs=['cam/image_array',
-    #         'user/angle', 'user/throttle', 
-    #         'pilot/angle', 'pilot/throttle', 
-    #         'user/mode']
-    # types=['image_array',
-    #        'float', 'float',  
-    #        'float', 'float', 
-    #        'str']
-    
-    # th = TubHandler(path=cfg.DATA_PATH)
-    # tub = th.new_tub_writer(inputs=inputs, types=types)
-    # V.add(tub, inputs=inputs, run_condition='recording')
-
     # debugging inpots/outputs
     #attrs = dir(V)
     #print(attrs)
@@ -233,19 +219,13 @@ def autodrive(cfg, model_path=None):
     #Start the vehicle
     V.start()
 
-    # try:
-    #     V.run(rate_hz=cfg.DRIVE_LOOP_HZ,
-    #           max_loop_count=cfg.MAX_LOOPS)
-    # except KeyboardInterrupt:
-    #     print('pausing')
-    #     V.pause()
-
     # Loop forever so IotClient can do it's thing
     try:
         while True:
             if iot.moving() is True:
-                print("Using model at " + cfg.MODEL_MAP[iot.get_model_num()])
-                V.get("KerasCategorical").load(cfg.MODEL_MAP[iot.get_model_num()])
+                if iot.get_destination() is not 0:
+                    print("Using model at " + cfg.MODEL_MAP[iot.get_model_num()])
+                    V.get("KerasCategorical").load(cfg.MODEL_MAP[iot.get_model_num()])
 
                 try:
                     V.run(rate_hz=cfg.DRIVE_LOOP_HZ,
@@ -254,6 +234,7 @@ def autodrive(cfg, model_path=None):
                 except KeyboardInterrupt:
                     print('Pausing rover')
                     V.pause()
+                    V.three_point_turn()
                     iot.update_shadow_after_stop()
 
         time.sleep(1)
