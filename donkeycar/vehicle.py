@@ -142,7 +142,7 @@ class Vehicle():
 
     def pause(self):
         print('Vehicle is stopped')
-        pass
+        self.stop()
 
     def update_parts(self):
         '''
