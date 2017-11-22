@@ -136,6 +136,7 @@ class Vehicle():
                     time.sleep(sleep_time)     
 
         except KeyboardInterrupt:
+            print("in run KeyboardInterrupt")
             pass
         finally:
             self.stop()
