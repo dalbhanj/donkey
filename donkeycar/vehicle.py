@@ -148,6 +148,9 @@ class Vehicle():
             if entry['part'].__class__.__name__ is "PWMThrottle":
                 print("Shutting down Throttle")
                 entry['part'].shutdown()
+            if entry['part'].__class__.__name__ is "PWMSteering":
+                print("Shutting down Steering")
+                entry['part'].shutdown()
 
 
     def update_parts(self):
