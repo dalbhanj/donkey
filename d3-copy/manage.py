@@ -15,6 +15,7 @@ Options:
     --no_cache    During training, load image repeatedly on each epoch
 """
 import os
+import time
 from docopt import docopt
 
 import donkeycar as dk

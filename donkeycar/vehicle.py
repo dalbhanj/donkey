@@ -9,7 +9,7 @@ Created on Sun Jun 25 10:44:24 2017
 import time
 from threading import Thread
 from .memory import Memory
-from donkeycar.parts.actuator import PWMThrottle
+#from donkeycar.parts.actuator import PWMThrottle
 
 class Vehicle():
     def __init__(self, mem=None):
