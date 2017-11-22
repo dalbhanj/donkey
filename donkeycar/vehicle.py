@@ -126,7 +126,8 @@ class Vehicle():
         self.running = True
         print('starting drive loop')
         while self.running:
-            start_time = time.time()            
+            print("In run loop")
+            start_time = time.time()
             loop_count += 1
 
             self.update_parts()
@@ -141,16 +142,8 @@ class Vehicle():
 
             sleep_time = 1.0 / rate_hz - (time.time() - start_time)
             if sleep_time > 0.0:
-                time.sleep(sleep_time)           
-        # try:
-
-  
-
-        # except KeyboardInterrupt:
-        #     print("in run KeyboardInterrupt")
-        #     pass
-        # finally:
-        #     self.stop()
+                time.sleep(sleep_time)
+        return self.running
 
     def pause(self):
         print('Vehicle is stopped')
