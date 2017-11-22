@@ -72,8 +72,8 @@ REQ_DELIVERY_TOPIC = "req/waiterbot/v1/deliver/" + CLIENT_NAME
 RES_DELIVERY_TOPIC = "res/waiterbot/v1/deliver/" + CLIENT_NAME
 SHUTDOWN_TOPIC = "req/waiterbot/v1/shutdown/" + CLIENT_NAME
 MODEL_MAP = {
-    1: os.path.join(MODELS_PATH) + "matt-desk-10-02-1430",
-    2: os.path.join(MODELS_PATH) + "wangechi-desk-10-02",
-    3: os.path.join(MODELS_PATH) + "peter_desk-10-05",
+    1: os.path.join(MODELS_PATH) + "/matt-desk-10-02-1430",
+    2: os.path.join(MODELS_PATH) + "/wangechi-desk-10-02",
+    3: os.path.join(MODELS_PATH) + "/peter_desk-10-05",
     4: "PATH_TO_TABLE_4_MODEL",
 }

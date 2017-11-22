@@ -241,14 +241,12 @@ def autodrive(cfg, model_path=None):
     #     V.pause()
 
     # Loop forever so IotClient can do it's thing
-    # try:
-    #     while True:
-    #         time.sleep(1)
-    # except KeyboardInterrupt:
-    #     # Stop vehicle gracefully
-    #     V.stop()
-    while True:
+    try:
+        while True:
             time.sleep(1)
+    except KeyboardInterrupt:
+        # Stop vehicle gracefully
+        V.stop()
 
 def train(cfg, tub_names, model_name):
     '''
