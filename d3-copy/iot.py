@@ -128,6 +128,7 @@ class IotClient:
             print('pausing')
             self.vehicle.pause()
             self.update_shadow_after_stop()
+        print("leaving move_vehicle")
 
     def update_shadow_after_stop(self):
         '''
