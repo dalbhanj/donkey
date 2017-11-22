@@ -242,31 +242,32 @@ def autodrive(cfg, model_path=None, use_joystick=False):
 
     #Start the vehicle and add the parts
     V.start()
-    V.update_parts()
+    #V.update_parts()
 
     InKey = _GetCh()
 
     print('Press Ctrl-C to exit')
 
     c = InKey()
-    while c != 3:
-        try:
-          if c == 32:
+    #while c != 3:
+    try:
+        V.run(rate_hz=cfg.DRIVE_LOOP_HZ, 
+        max_loop_count=cfg.MAX_LOOPS)           
+        if c == 32:
             keypress_mode='pause'
             print("keypress_mode = ", keypress_mode)
             V.pause()
-          elif c == 51:
+        elif c == 51:
             print("doing 3-point turn")
-          else:
+        else:
             keypress_mode='run'
             print ("keypress_mode = ", keypress_mode)
             #V.update_parts()
-            V.run(rate_hz=cfg.DRIVE_LOOP_HZ, 
-            max_loop_count=cfg.MAX_LOOPS)            
-          c = InKey()
-        except KeyboardInterrupt: 
-            V.pause()
-    
+      c = InKey()
+    except KeyboardInterrupt: 
+        print('pausing')
+        V.pause()
+
     print("You are now driving semi-autonomous using local_angle and constant throttle.")
 
 def train(cfg, tub_names, model_name):
