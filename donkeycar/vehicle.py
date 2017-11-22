@@ -22,6 +22,8 @@ class Vehicle():
         self.threads = []
 
 
+    # def add(self, part, inputs=[], outputs=[], 
+    #         threaded=False, run_condition=None, keypress_condition=False):
     def add(self, part, inputs=[], outputs=[], 
             threaded=False, run_condition=None):
         """
@@ -43,6 +45,7 @@ class Vehicle():
         entry['part'] = p
         entry['inputs'] = inputs
         entry['outputs'] = outputs
+        #entry['keypress_condition'] = keypress_condition
         entry['run_condition'] = run_condition
 
         if threaded:
@@ -53,7 +56,7 @@ class Vehicle():
         self.parts.append(entry)
 
 
-    def start(self, rate_hz=10, max_loop_count=None):
+    def start(self):
         """
         Start vehicle's main drive loop.
 
@@ -85,26 +88,61 @@ class Vehicle():
             print('Starting vehicle...')
             time.sleep(1)
 
+            #self.update_parts()
+            #self.run()
+            # loop_count = 0
+            # while self.on:
+            #     start_time = time.time()
+            #     loop_count += 1
+
+            #     #self.update_parts()
+
+            #     #stop drive loop if loop_count exceeds max_loopcount
+            #     if max_loop_count and loop_count > max_loop_count:
+            #         self.on = False
+
+            #     sleep_time = 1.0 / rate_hz - (time.time() - start_time)
+            #     if sleep_time > 0.0:
+            #         time.sleep(sleep_time)
+
+        except KeyboardInterrupt:
+            pass
+
+    def run(self, rate_hz=10, max_loop_count=None):
+        '''
+        just run the drive loop 
+        '''
+        try:
+
             loop_count = 0
-            while self.on:
-                start_time = time.time()
+            self.running = True
+            print('starting drive loop')
+            while self.running:
+                start_time = time.time()            
                 loop_count += 1
 
-                self.update_parts()
+                #self.update_parts()
 
                 #stop drive loop if loop_count exceeds max_loopcount
                 if max_loop_count and loop_count > max_loop_count:
-                    self.on = False
+                    self.running = False
+
+                # if keypress_mode == 'pause':
+                #     self.running = False
+                #     print('exiting drive loop')
 
                 sleep_time = 1.0 / rate_hz - (time.time() - start_time)
                 if sleep_time > 0.0:
-                    time.sleep(sleep_time)
+                    time.sleep(sleep_time)     
 
         except KeyboardInterrupt:
             pass
         finally:
             self.stop()
 
+    def pause(self):
+        print('Vehicle is stopped')
+        pass
 
     def update_parts(self):
         '''
@@ -113,19 +151,22 @@ class Vehicle():
         for entry in self.parts:
             #don't run if there is a run condition that is False
             run = True
+
             if entry.get('run_condition'):
                 run_condition = entry.get('run_condition')
                 run = self.mem.get([run_condition])[0]
                 #print('run_condition', entry['part'], entry.get('run_condition'), run)
-            
+
             if run:
                 p = entry['part']
                 #get inputs from memory
                 inputs = self.mem.get(entry['inputs'])
+                #print(self.mem.d)
 
                 #run the part
                 if entry.get('thread'):
                     outputs = p.run_threaded(*inputs)
+                    #print(self.mem.d)
                 else:
                     outputs = p.run(*inputs)
 
@@ -133,7 +174,6 @@ class Vehicle():
                 if outputs is not None:
                     self.mem.put(entry['outputs'], outputs)
 
-                    
 
     def stop(self):
         print('Shutting down vehicle and its parts...')
