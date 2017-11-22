@@ -9,7 +9,7 @@ Created on Sun Jun 25 10:44:24 2017
 import time
 from threading import Thread
 from .memory import Memory
-
+#from donkeycar.parts.actuator import PWMThrottle
 
 class Vehicle():
     def __init__(self, mem=None):
@@ -112,37 +112,46 @@ class Vehicle():
         '''
         just run the drive loop 
         '''
-        try:
+        loop_count = 0
+        self.running = True
+        print('starting drive loop')
+        while self.running:
+            start_time = time.time()            
+            loop_count += 1
 
-            loop_count = 0
-            self.running = True
-            print('starting drive loop')
-            while self.running:
-                start_time = time.time()            
-                loop_count += 1
+            self.update_parts()
 
-                #self.update_parts()
+            #stop drive loop if loop_count exceeds max_loopcount
+            if max_loop_count and loop_count > max_loop_count:
+                self.running = False
 
-                #stop drive loop if loop_count exceeds max_loopcount
-                if max_loop_count and loop_count > max_loop_count:
-                    self.running = False
+            # if keypress_mode == 'pause':
+            #     self.running = False
+            #     print('exiting drive loop')
 
-                # if keypress_mode == 'pause':
-                #     self.running = False
-                #     print('exiting drive loop')
+            sleep_time = 1.0 / rate_hz - (time.time() - start_time)
+            if sleep_time > 0.0:
+                time.sleep(sleep_time)           
+        # try:
 
-                sleep_time = 1.0 / rate_hz - (time.time() - start_time)
-                if sleep_time > 0.0:
-                    time.sleep(sleep_time)     
+  
 
-        except KeyboardInterrupt:
-            pass
-        finally:
-            self.stop()
+        # except KeyboardInterrupt:
+        #     print("in run KeyboardInterrupt")
+        #     pass
+        # finally:
+        #     self.stop()
 
     def pause(self):
         print('Vehicle is stopped')
-        pass
+        for entry in self.parts:
+            if entry['part'].__class__.__name__ is "PWMThrottle":
+                print("Shutting down Throttle")
+                entry['part'].shutdown()
+            if entry['part'].__class__.__name__ is "PWMSteering":
+                print("Shutting down Steering")
+                entry['part'].shutdown()
+
 
     def update_parts(self):
         '''

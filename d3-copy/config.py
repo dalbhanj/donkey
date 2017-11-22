@@ -40,7 +40,7 @@ THROTTLE_STOPPED_PWM = 370
 THROTTLE_REVERSE_PWM = 220
 
 # Setting options for autodrive in manage.py 
-CONSTANT_THROTTLE = .25
+CONSTANT_THROTTLE = .20
 MODE_CONFIG = 'local_angle'
 
 # Setting options for 3-point turn
@@ -72,8 +72,8 @@ REQ_DELIVERY_TOPIC = "req/waiterbot/v1/deliver/" + CLIENT_NAME
 RES_DELIVERY_TOPIC = "res/waiterbot/v1/deliver/" + CLIENT_NAME
 SHUTDOWN_TOPIC = "req/waiterbot/v1/shutdown/" + CLIENT_NAME
 MODEL_MAP = {
-    1: "PATH_TO_TABLE_1_MODEL",
-    2: "PATH_TO_TABLE_2_MODEL",
-    3: "PATH_TO_TABLE_3_MODEL",
+    1: "os.path.join(MODELS_PATH)/matt-desk-10-02-1430",
+    2: "os.path.join(MODELS_PATH)/wangechi-desk-10-02",
+    3: "os.path.join(MODELS_PATH)/peter_desk-10-05",
     4: "PATH_TO_TABLE_4_MODEL",
 }
