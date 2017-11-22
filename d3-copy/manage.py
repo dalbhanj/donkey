@@ -255,6 +255,8 @@ def autodrive(cfg, model_path=None, use_joystick=False):
 
     print("You are now driving semi-autonomous using local_angle and constant throttle.")
 
+    V.stop()
+
 def train(cfg, tub_names, model_name):
     '''
     use the specified data in tub_names to train an artifical neural network
