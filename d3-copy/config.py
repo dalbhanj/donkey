@@ -60,3 +60,20 @@ USE_JOYSTICK_AS_DEFAULT = False
 JOYSTICK_MAX_THROTTLE = 0.25
 JOYSTICK_STEERING_SCALE = 1.0
 AUTO_RECORD_ON_THROTTLE = True
+
+# IoT
+IOT_ENDPOINT = "ad16cm18p9apb.iot.us-east-1.amazonaws.com"
+ROOT_CERT_PATH = "./iotCerts/rootCA.pem"
+CERT_PATH = "./iotCerts/cert.pem"
+PRIVATE_KEY_PATH = "./iotCerts/private.key"
+CLIENT_NAME = "bot1"
+THING_NAME = "waiterbot-bot1"
+REQ_DELIVERY_TOPIC = "req/waiterbot/v1/deliver/" + CLIENT_NAME
+RES_DELIVERY_TOPIC = "res/waiterbot/v1/deliver/" + CLIENT_NAME
+SHUTDOWN_TOPIC = "req/waiterbot/v1/shutdown/" + CLIENT_NAME
+MODEL_MAP = {
+    1: "PATH_TO_TABLE_1_MODEL",
+    2: "PATH_TO_TABLE_2_MODEL",
+    3: "PATH_TO_TABLE_3_MODEL",
+    4: "PATH_TO_TABLE_4_MODEL",
+}
