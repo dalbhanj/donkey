@@ -142,6 +142,8 @@ class Vehicle():
         print("First point of turn")
         steering.run(-1)
         while turn_duration < 100:
+            if turn_duration is 0:
+                print("in first while loop")
             start_time = time.time()
             throttle.run(-.30)
             turn_duration = turn_duration + 1
@@ -149,11 +151,14 @@ class Vehicle():
             if sleep_time > 0.0:
                 time.sleep(sleep_time)
 
+        self.pause()
         # Perform the second point
         turn_duration = 0
         print("Second point of turn")
         steering.run(1)
         while turn_duration < 100:
+            if turn_duration is 0:
+                print("in second while loop")
             start_time = time.time()
             throttle.run(.30)
             turn_duration = turn_duration + 1
