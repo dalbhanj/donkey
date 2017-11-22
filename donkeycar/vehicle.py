@@ -139,14 +139,19 @@ class Vehicle():
         turn_duration = 0
 
         # Perform the first point of the turn
+        print("First point of turn")
         steering.run(-1)
         while turn_duration < 20:
             throttle.run(-.30)
+            turn_duration = turn_duration + 1
 
         # Perform the second point
+        turn_duration = 0
+        print("Second point of turn")
         steering.run(1)
         while turn_duration < 20:
             throttle.run(-.30)
+            turn_duration = turn_duration + 1
 
     def update_parts(self):
         '''
