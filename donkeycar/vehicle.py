@@ -145,7 +145,7 @@ class Vehicle():
     def pause(self):
         print('Vehicle is stopped')
         for entry in self.parts:
-            if typeof(entry) is PWMThrottle:
+            if entry['part']__class__.__name__ is "PWMThrottle":
                 print("Shutting down Throttle")
                 entry['part'].shutdown()
 
