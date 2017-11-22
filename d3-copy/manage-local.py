@@ -6,6 +6,7 @@ Usage:
     manage.py (drive) [--model=<model>] [--js]
     manage.py (autodrive) [--model=<model>] [--js]
     manage.py (train) [--tub=<tub1,tub2,..tubn>]  (--model=<model>) [--no_cache]
+    manage.py (turn)
 
 Options:
     -h --help        Show this screen.
@@ -167,7 +168,7 @@ def autodrive(cfg, model_path=None):
     
     # # Settings for rover to run pilot_condition
     # mode = 'local_angle'
-    
+
     #See if we should even run the pilot module. 
     #This is only needed because the part run_condition only accepts boolean
     def pilot_condition(mode):
@@ -304,7 +305,97 @@ def train(cfg, tub_names, model_name):
              steps=steps_per_epoch,
              train_split=cfg.TRAIN_TEST_SPLIT)
 
+def turn(cfg):
+    '''Initialize semi-autonomous driving with local_angle and custom throttle option
+    '''
 
+    #Initialize car
+    V = dk.vehicle.Vehicle()
+    cam = PiCamera(resolution=cfg.CAMERA_RESOLUTION)
+    V.add(cam, outputs=['cam/image_array'], threaded=True)
+
+    ctr = LocalWebController()
+
+    V.add(ctr,
+          inputs=['cam/image_array'],
+          outputs=['user/angle', 'user/throttle', 'user/mode', 'recording'],
+          threaded=True)
+
+    #See if we should even run the pilot module.
+    #This is only needed because the part run_condition only accepts boolean
+    def pilot_condition(mode, keypress_mode):
+        if mode == 'user':
+            return False
+
+        elif mode == 'local_angle' and keypress_mode == 'pause':
+            return False
+
+        else:
+            return True
+
+    pilot_condition_part = Lambda(pilot_condition)
+    V.add(pilot_condition_part, inputs=['user/mode', 'keypress/mode'], outputs=['run_pilot'])
+
+    #Run the pilot if the mode is not user.
+    kl = KerasCategorical()
+    if model_path:
+        kl.load(model_path)
+
+    V.add(kl, inputs=['cam/image_array'],
+          outputs=['pilot/angle', 'pilot/throttle'],
+          run_condition='run_pilot')
+
+    #Choose what inputs should change the car.
+    def drive_mode(mode,
+                   user_angle, user_throttle,
+                   pilot_angle, pilot_throttle):
+
+        if mode == 'user':
+            return user_angle, user_throttle
+
+        elif mode == 'local_angle':
+            return pilot_angle, cfg.CONSTANT_THROTTLE
+
+        else:
+            return pilot_angle, pilot_throttle
+
+    drive_mode_part = Lambda(drive_mode)
+    V.add(drive_mode_part,
+          inputs=['user/mode', 'user/angle', 'user/throttle',
+                  'pilot/angle', 'pilot/throttle'],
+          outputs=['angle', 'throttle'])
+
+    steering_controller = PCA9685(cfg.STEERING_CHANNEL)
+    steering = PWMSteering(controller=steering_controller,
+                           left_pulse=cfg.STEERING_LEFT_PWM,
+                           right_pulse=cfg.STEERING_RIGHT_PWM)
+
+    throttle_controller = PCA9685(cfg.THROTTLE_CHANNEL)
+    throttle = PWMThrottle(controller=throttle_controller,
+                           max_pulse=cfg.THROTTLE_FORWARD_PWM,
+                           zero_pulse=cfg.THROTTLE_STOPPED_PWM,
+                           min_pulse=cfg.THROTTLE_REVERSE_PWM)
+
+    V.add(steering, inputs=['angle'])
+    V.add(throttle, inputs=['throttle'])
+
+    # debugging inpots/outputs
+    #attrs = dir(V)
+    #print(attrs)
+    for items in V.parts:
+        print(items)
+
+    # Initialize IotClient
+    iot = IotClient(cfg, V)
+
+    #Start the vehicle
+    V.start()
+
+    # Execute the three point turn
+    V.three_point_turn()
+
+    # Stop vehicle gracefully (if we ever get here)
+    V.stop()
 
 
 
@@ -324,6 +415,8 @@ if __name__ == '__main__':
         cache = not args['--no_cache']
         train(cfg, tub, model)
 
+    elif args['turn']:
+        turn(cfg)
 
 
 

@@ -6,6 +6,7 @@ Usage:
     manage.py (drive) [--model=<model>] [--js]
     manage.py (autodrive) [--model=<model>] [--js]
     manage.py (train) [--tub=<tub1,tub2,..tubn>]  (--model=<model>) [--no_cache]
+    manage.py (turn)
 
 Options:
     -h --help        Show this screen.
