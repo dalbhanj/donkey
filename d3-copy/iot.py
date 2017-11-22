@@ -118,9 +118,8 @@ class IotClient:
         then calls vehicle.run to move the rover to the desired destination.
         '''
         # Get the current Keras part from vehicle to load new model
-        # THIS ASSUMES THE PART IS ALWAYS NAMED kl
         print("Using model at " + self.cfg.MODEL_MAP[model_num])
-        self.vehicle.get("kl").load(self.cfg.MODEL_MAP[model_num])
+        self.vehicle.get("KerasCategorical").load(self.cfg.MODEL_MAP[model_num])
 
         try:
             self.vehicle.run(rate_hz=self.cfg.DRIVE_LOOP_HZ,
