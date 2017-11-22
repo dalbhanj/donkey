@@ -244,6 +244,15 @@ def autodrive(cfg, model_path=None):
         print('pausing')
         V.pause()
 
+    time.sleep(20)
+
+    try:
+        V.run(rate_hz=cfg.DRIVE_LOOP_HZ, 
+        max_loop_count=cfg.MAX_LOOPS)           
+    except KeyboardInterrupt: 
+        print('pausing')
+        V.pause()
+
     print("You are now driving semi-autonomous using local_angle and constant throttle.")
 
     V.stop()

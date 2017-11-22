@@ -40,7 +40,7 @@ THROTTLE_STOPPED_PWM = 370
 THROTTLE_REVERSE_PWM = 220
 
 # Setting options for autodrive in manage.py 
-CONSTANT_THROTTLE = .25
+CONSTANT_THROTTLE = .20
 MODE_CONFIG = 'local_angle'
 
 # Setting options for 3-point turn

@@ -145,12 +145,10 @@ class Vehicle():
     def pause(self):
         print('Vehicle is stopped')
         for entry in self.parts:
-            try:
-                print('trying to shutdown PWMThrottle')
-                print(entry)
-                # entry[PWMThrottle].shutdown
-            except Exception as e:
-                print(e)
+            if typeof(entry) is PWMThrottle:
+                print("Shutting down Throttle")
+                entry['part'].shutdown()
+
 
     def update_parts(self):
         '''
