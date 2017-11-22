@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Scripts to drive a donkey 2 car and train a model for it. 
+Scripts to drive a donkey 2 car and train a model for it.
 
 Usage:
     manage.py (drive) [--model=<model>] [--js]
@@ -47,65 +47,64 @@ def drive(cfg, model_path=None, use_joystick=False):
     V = dk.vehicle_old.Vehicle()
     cam = PiCamera(resolution=cfg.CAMERA_RESOLUTION)
     V.add(cam, outputs=['cam/image_array'], threaded=True)
-    
+
     if use_joystick or cfg.USE_JOYSTICK_AS_DEFAULT:
         #modify max_throttle closer to 1.0 to have more power
         #modify steering_scale lower than 1.0 to have less responsive steering
         ctr = JoystickController(max_throttle=cfg.JOYSTICK_MAX_THROTTLE,
                                  steering_scale=cfg.JOYSTICK_STEERING_SCALE,
                                  auto_record_on_throttle=cfg.AUTO_RECORD_ON_THROTTLE)
-    else:        
+    else:
         #This web controller will create a web server that is capable
         #of managing steering, throttle, and modes, and more.
         ctr = LocalWebController()
 
-    
-    V.add(ctr, 
+    V.add(ctr,
           inputs=['cam/image_array'],
           outputs=['user/angle', 'user/throttle', 'user/mode', 'recording'],
           threaded=True)
-    
-    #See if we should even run the pilot module. 
+
+    #See if we should even run the pilot module.
     #This is only needed because the part run_condition only accepts boolean
     def pilot_condition(mode):
         if mode == 'user':
             return False
         else:
             return True
-        
+
     pilot_condition_part = Lambda(pilot_condition)
     V.add(pilot_condition_part, inputs=['user/mode'], outputs=['run_pilot'])
-    
+
     #Run the pilot if the mode is not user.
     kl = KerasCategorical()
     if model_path:
         kl.load(model_path)
-    
+
     V.add(kl, inputs=['cam/image_array'], 
           outputs=['pilot/angle', 'pilot/throttle'],
           run_condition='run_pilot')
-    
-    
+
+
     #Choose what inputs should change the car.
-    def drive_mode(mode, 
+    def drive_mode(mode,
                    user_angle, user_throttle,
                    pilot_angle, pilot_throttle):
-        if mode == 'user': 
+        if mode == 'user':
             return user_angle, user_throttle
-        
+
         elif mode == 'local_angle':
             return pilot_angle, user_throttle
-        
+
         else: 
             return pilot_angle, pilot_throttle
-        
+
     drive_mode_part = Lambda(drive_mode)
-    V.add(drive_mode_part, 
+    V.add(drive_mode_part,
           inputs=['user/mode', 'user/angle', 'user/throttle',
-                  'pilot/angle', 'pilot/throttle'], 
+                  'pilot/angle', 'pilot/throttle'],
           outputs=['angle', 'throttle'])
-    
-    
+
+
     steering_controller = PCA9685(cfg.STEERING_CHANNEL)
     steering = PWMSteering(controller=steering_controller,
                                     left_pulse=cfg.STEERING_LEFT_PWM, 
@@ -314,8 +313,6 @@ def turn(cfg):
 
     #Run the pilot if the mode is not user.
     kl = KerasCategorical()
-    if model_path:
-        kl.load(model_path)
 
     V.add(kl, inputs=['cam/image_array'],
           outputs=['pilot/angle', 'pilot/throttle'],
@@ -360,9 +357,6 @@ def turn(cfg):
     #print(attrs)
     for items in V.parts:
         print(items)
-
-    # Initialize IotClient
-    iot = IotClient(cfg, V)
 
     #Start the vehicle
     V.start()
