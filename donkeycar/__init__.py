@@ -10,6 +10,7 @@ if sys.version_info.major < 3:
 
 from . import parts
 from .vehicle import Vehicle
+from .vehicle_old import Vehicle
 from .memory import Memory
 from . import utils
 from . import config

@@ -43,7 +43,7 @@ def drive(cfg, model_path=None, use_joystick=False):
     '''
 
     #Initialize car
-    V = dk.vehicle-old.Vehicle()
+    V = dk.vehicle_old.Vehicle()
     cam = PiCamera(resolution=cfg.CAMERA_RESOLUTION)
     V.add(cam, outputs=['cam/image_array'], threaded=True)
     
