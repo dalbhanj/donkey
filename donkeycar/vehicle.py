@@ -141,21 +141,37 @@ class Vehicle():
         # Perform the first point of the turn
         print("First point of turn")
         steering.run(-1)
-        while turn_duration < 100:
+        while turn_duration < 25:
             start_time = time.time()
-            throttle.run(-.30)
+            throttle.run(-.25)
             turn_duration = turn_duration + 1
             sleep_time = 1.0 / rate_hz - (time.time() - start_time)
             if sleep_time > 0.0:
                 time.sleep(sleep_time)
 
+        self.pause()
+        time.sleep(2)
         # Perform the second point
         turn_duration = 0
         print("Second point of turn")
         steering.run(1)
-        while turn_duration < 100:
+        while turn_duration < 50:
             start_time = time.time()
             throttle.run(.30)
+            turn_duration = turn_duration + 1
+            sleep_time = 1.0 / rate_hz - (time.time() - start_time)
+            if sleep_time > 0.0:
+                time.sleep(sleep_time)
+
+        self.pause()
+        time.sleep(2)
+        # Perform the third point
+        turn_duration = 0
+        print("third point of turn")
+        steering.run(-1)
+        while turn_duration < 25:
+            start_time = time.time()
+            throttle.run(-.30)
             turn_duration = turn_duration + 1
             sleep_time = 1.0 / rate_hz - (time.time() - start_time)
             if sleep_time > 0.0:
