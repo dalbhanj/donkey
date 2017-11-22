@@ -99,15 +99,15 @@ class IotClient:
                 self.shadow['state']['reported']['current_order'] = desired_state['current_order']
                 print("Model # to use: " + str(self.model_num))
                 print("Current shadow: " + str(self.shadow))
-            elif desired_state['destination'] is 0: # going back to kitchen
-                # The same model we used to get to the table we use to get back to the kitchen
-                self.model_num = self.shadow['state']['reported']['destination']
-                # Update shadow with new values
-                self.shadow['state']['reported']['location'] = -1 # -1 for moving
-                self.shadow['state']['reported']['destination'] = desired_state['destination']
-                self.shadow['state']['reported']['current_order'] = desired_state['current_order']
-                print("Model # to use: " + str(self.model_num))
-                print("Current shadow: " + str(self.shadow))
+            # elif desired_state['destination'] is 0: # going back to kitchen
+            #     # The same model we used to get to the table we use to get back to the kitchen
+            #     self.model_num = self.shadow['state']['reported']['destination']
+            #     # Update shadow with new values
+            #     self.shadow['state']['reported']['location'] = -1 # -1 for moving
+            #     self.shadow['state']['reported']['destination'] = desired_state['destination']
+            #     self.shadow['state']['reported']['current_order'] = desired_state['current_order']
+            #     print("Model # to use: " + str(self.model_num))
+            #     print("Current shadow: " + str(self.shadow))
 
     def get_model_num(self):
         '''
@@ -122,6 +122,13 @@ class IotClient:
         Return True if the rover should be moving, False if not
         '''
         return self.shadow['state']['reported']['location'] is -1
+
+    def get_destination(self):
+        '''
+        **Description**
+        Return the current destination
+        '''
+        return self.shadow['state']['reported']['destination']
 
     # def move_vehicle(self, model_num):
     #     '''

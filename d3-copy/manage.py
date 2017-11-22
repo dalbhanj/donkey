@@ -244,8 +244,9 @@ def autodrive(cfg, model_path=None):
     try:
         while True:
             if iot.moving() is True:
-                print("Using model at " + cfg.MODEL_MAP[iot.get_model_num()])
-                V.get("KerasCategorical").load(cfg.MODEL_MAP[iot.get_model_num()])
+                if iot.get_destination() is not 0:
+                    print("Using model at " + cfg.MODEL_MAP[iot.get_model_num()])
+                    V.get("KerasCategorical").load(cfg.MODEL_MAP[iot.get_model_num()])
 
                 try:
                     V.run(rate_hz=cfg.DRIVE_LOOP_HZ,

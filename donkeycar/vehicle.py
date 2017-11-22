@@ -62,7 +62,7 @@ class Vehicle():
         '''
         for entry in self.parts:
             if entry['part'].__class__.__name__ is part_name:
-                print("Returning part " + part_name)
+                #print("Returning part " + part_name)
                 return entry['part']
 
 
