@@ -128,7 +128,7 @@ class Vehicle():
                 print("Shutting down Steering")
                 entry['part'].shutdown()
 
-    def three_point_turn(self):
+    def three_point_turn(self, rate_hz=10):
         '''
         **Description**
         Make the rover perform a three point turn so it's facing 180 degrees from start
@@ -142,16 +142,24 @@ class Vehicle():
         print("First point of turn")
         steering.run(-1)
         while turn_duration < 100:
+            start_time = time.time()
             throttle.run(-.30)
             turn_duration = turn_duration + 1
+            sleep_time = 1.0 / rate_hz - (time.time() - start_time)
+            if sleep_time > 0.0:
+                time.sleep(sleep_time)
 
         # Perform the second point
         turn_duration = 0
         print("Second point of turn")
         steering.run(1)
         while turn_duration < 100:
+            start_time = time.time()
             throttle.run(.30)
             turn_duration = turn_duration + 1
+            sleep_time = 1.0 / rate_hz - (time.time() - start_time)
+            if sleep_time > 0.0:
+                time.sleep(sleep_time)
 
     def update_parts(self):
         '''
