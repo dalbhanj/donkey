@@ -131,7 +131,7 @@ def drive(cfg, model_path=None, use_joystick=False):
     
     print("You can now go to <your pi ip address>:8887 to drive your car.")
 
-def autodrive(cfg, model_path=None, use_joystick=False):
+def autodrive(cfg, model_path=None):
     '''Initialize semi-autonomous driving with local_angle and custom throttle option
     '''
 
@@ -140,16 +140,7 @@ def autodrive(cfg, model_path=None, use_joystick=False):
     cam = PiCamera(resolution=cfg.CAMERA_RESOLUTION)
     V.add(cam, outputs=['cam/image_array'], threaded=True)
     
-    if use_joystick or cfg.USE_JOYSTICK_AS_DEFAULT:
-        #modify max_throttle closer to 1.0 to have more power
-        #modify steering_scale lower than 1.0 to have less responsive steering
-        ctr = JoystickController(max_throttle=cfg.JOYSTICK_MAX_THROTTLE,
-                                 steering_scale=cfg.JOYSTICK_STEERING_SCALE,
-                                 auto_record_on_throttle=cfg.AUTO_RECORD_ON_THROTTLE)
-    else:        
-        #This web controller will create a web server that is capable
-        #of managing steering, throttle, and modes, and more.
-        ctr = LocalWebController()
+    ctr = LocalWebController()
 
     V.add(ctr, 
           inputs=['cam/image_array'],
@@ -218,19 +209,19 @@ def autodrive(cfg, model_path=None, use_joystick=False):
     V.add(throttle, inputs=['throttle'])
     
 
-    #add tub to save data
-    inputs=['cam/image_array',
-            'user/angle', 'user/throttle', 
-            'pilot/angle', 'pilot/throttle', 
-            'user/mode']
-    types=['image_array',
-           'float', 'float',  
-           'float', 'float', 
-           'str']
+    # #add tub to save data
+    # inputs=['cam/image_array',
+    #         'user/angle', 'user/throttle', 
+    #         'pilot/angle', 'pilot/throttle', 
+    #         'user/mode']
+    # types=['image_array',
+    #        'float', 'float',  
+    #        'float', 'float', 
+    #        'str']
     
-    th = TubHandler(path=cfg.DATA_PATH)
-    tub = th.new_tub_writer(inputs=inputs, types=types)
-    V.add(tub, inputs=inputs, run_condition='recording')
+    # th = TubHandler(path=cfg.DATA_PATH)
+    # tub = th.new_tub_writer(inputs=inputs, types=types)
+    # V.add(tub, inputs=inputs, run_condition='recording')
     
     
     # debugging inpots/outputs
@@ -305,7 +296,7 @@ if __name__ == '__main__':
         drive(cfg, model_path = args['--model'], use_joystick=args['--js'])
 
     elif args['autodrive']:
-        autodrive(cfg, model_path = args['--model'], use_joystick=args['--js'])
+        autodrive(cfg, model_path = args['--model'])
 
     elif args['train']:
         tub = args['--tub']

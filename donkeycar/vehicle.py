@@ -9,7 +9,7 @@ Created on Sun Jun 25 10:44:24 2017
 import time
 from threading import Thread
 from .memory import Memory
-
+from donkeycar.parts.actuator import PWMThrottle
 
 class Vehicle():
     def __init__(self, mem=None):
@@ -144,7 +144,13 @@ class Vehicle():
 
     def pause(self):
         print('Vehicle is stopped')
-        self.stop()
+        for entry in self.parts:
+            try:
+                print('trying to shutdown PWMThrottle')
+                print(entry)
+                # entry[PWMThrottle].shutdown
+            except Exception as e:
+                print(e)
 
     def update_parts(self):
         '''
