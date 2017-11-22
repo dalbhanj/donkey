@@ -244,26 +244,11 @@ def autodrive(cfg, model_path=None, use_joystick=False):
     V.start()
     #V.update_parts()
 
-    InKey = _GetCh()
-
     print('Press Ctrl-C to exit')
 
-    c = InKey()
-    #while c != 3:
     try:
         V.run(rate_hz=cfg.DRIVE_LOOP_HZ, 
         max_loop_count=cfg.MAX_LOOPS)           
-        if c == 32:
-            keypress_mode='pause'
-            print("keypress_mode = ", keypress_mode)
-            V.pause()
-        elif c == 51:
-            print("doing 3-point turn")
-        else:
-            keypress_mode='run'
-            print ("keypress_mode = ", keypress_mode)
-            #V.update_parts()
-        c = InKey()
     except KeyboardInterrupt: 
         print('pausing')
         V.pause()
