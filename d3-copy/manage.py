@@ -241,14 +241,27 @@ def autodrive(cfg, model_path=None):
     #     V.pause()
 
     # Loop forever so IotClient can do it's thing
-    # try:
-    #     while True:
-    #         time.sleep(1)
-    # except KeyboardInterrupt:
-    #     # Stop vehicle gracefully
-    #     V.stop()
-    while True:
+    try:
+        while True:
+            if iot.moving() is True:
+                print("Using model at " + cfg.MODEL_MAP[iot.get_model_num()])
+                V.get("KerasCategorical").load(cfg.MODEL_MAP[iot.get_model_num()])
+
+                try:
+                    V.run(rate_hz=cfg.DRIVE_LOOP_HZ,
+                          max_loop_count=cfg.MAX_LOOPS)
+                    print("V.run returned...I should never see this")
+                except KeyboardInterrupt:
+                    print('Pausing rover')
+                    V.pause()
+                    iot.update_shadow_after_stop()
+
         time.sleep(1)
+    except KeyboardInterrupt:
+        pass
+
+    # Stop vehicle gracefully (if we ever get here)
+    V.stop()
 
 def train(cfg, tub_names, model_name):
     '''

@@ -126,7 +126,6 @@ class Vehicle():
         self.running = True
         print('starting drive loop')
         while self.running:
-            print("In run loop")
             start_time = time.time()
             loop_count += 1
 
@@ -135,10 +134,6 @@ class Vehicle():
             #stop drive loop if loop_count exceeds max_loopcount
             if max_loop_count and loop_count > max_loop_count:
                 self.running = False
-
-            # if keypress_mode == 'pause':
-            #     self.running = False
-            #     print('exiting drive loop')
 
             sleep_time = 1.0 / rate_hz - (time.time() - start_time)
             if sleep_time > 0.0:
