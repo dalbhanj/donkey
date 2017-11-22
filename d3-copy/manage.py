@@ -16,9 +16,11 @@ Options:
 """
 import os
 import time
+import json
 from docopt import docopt
 
 import donkeycar as dk
+from iot import IotClient
 
 #import parts
 from donkeycar.parts.camera import PiCamera
@@ -26,9 +28,8 @@ from donkeycar.parts.transform import Lambda
 from donkeycar.parts.keras import KerasCategorical
 from donkeycar.parts.actuator import PCA9685, PWMSteering, PWMThrottle
 from donkeycar.parts.datastore import TubHandler, TubGroup
-from donkeycar.parts.controller import LocalWebController, JoystickController
-from donkeycar.parts.keyboard import _GetCh
-
+from donkeycar.parts.controller import LocalWebController
+#from donkeycar.parts.keyboard import _GetCh
 
 def drive(cfg, model_path=None, use_joystick=False):
     '''
@@ -140,16 +141,15 @@ def autodrive(cfg, model_path=None):
     V = dk.vehicle.Vehicle()
     cam = PiCamera(resolution=cfg.CAMERA_RESOLUTION)
     V.add(cam, outputs=['cam/image_array'], threaded=True)
-    
+
     ctr = LocalWebController()
 
-    V.add(ctr, 
+    V.add(ctr,
           inputs=['cam/image_array'],
           outputs=['user/angle', 'user/throttle', 'user/mode', 'recording'],
           threaded=True)
 
-
-    #See if we should even run the pilot module. 
+    #See if we should even run the pilot module.
     #This is only needed because the part run_condition only accepts boolean
     def pilot_condition(mode, keypress_mode):
         if mode == 'user':
@@ -160,55 +160,52 @@ def autodrive(cfg, model_path=None):
 
         else:
             return True
-        
+
     pilot_condition_part = Lambda(pilot_condition)
     V.add(pilot_condition_part, inputs=['user/mode', 'keypress/mode'], outputs=['run_pilot'])
-    
+
     #Run the pilot if the mode is not user.
-    kl = KerasCategorical()
-    if model_path:
-        kl.load(model_path)
-    
-    V.add(kl, inputs=['cam/image_array'], 
-          outputs=['pilot/angle', 'pilot/throttle'],
-          run_condition='run_pilot')
+    # kl = KerasCategorical()
+    # if model_path:
+    #     kl.load(model_path)
+
+    # V.add(kl, inputs=['cam/image_array'],
+    #       outputs=['pilot/angle', 'pilot/throttle'],
+    #       run_condition='run_pilot')
 
     #Choose what inputs should change the car.
     def drive_mode(mode,
                    user_angle, user_throttle,
                    pilot_angle, pilot_throttle):
 
-        if mode == 'user': 
+        if mode == 'user':
             return user_angle, user_throttle
-        
-        elif mode == 'local_angle':
-            return pilot_angle, cfg.CONSTANT_THROTTLE 
 
-        else: 
+        elif mode == 'local_angle':
+            return pilot_angle, cfg.CONSTANT_THROTTLE
+
+        else:
             return pilot_angle, pilot_throttle
 
-
     drive_mode_part = Lambda(drive_mode)
-    V.add(drive_mode_part, 
+    V.add(drive_mode_part,
           inputs=['user/mode', 'user/angle', 'user/throttle',
-                  'pilot/angle', 'pilot/throttle'], 
+                  'pilot/angle', 'pilot/throttle'],
           outputs=['angle', 'throttle'])
-    
-    
+
     steering_controller = PCA9685(cfg.STEERING_CHANNEL)
     steering = PWMSteering(controller=steering_controller,
-                                    left_pulse=cfg.STEERING_LEFT_PWM, 
-                                    right_pulse=cfg.STEERING_RIGHT_PWM)
-    
+                           left_pulse=cfg.STEERING_LEFT_PWM,
+                           right_pulse=cfg.STEERING_RIGHT_PWM)
+
     throttle_controller = PCA9685(cfg.THROTTLE_CHANNEL)
     throttle = PWMThrottle(controller=throttle_controller,
-                                    max_pulse=cfg.THROTTLE_FORWARD_PWM,
-                                    zero_pulse=cfg.THROTTLE_STOPPED_PWM, 
-                                    min_pulse=cfg.THROTTLE_REVERSE_PWM)
-    
+                           max_pulse=cfg.THROTTLE_FORWARD_PWM,
+                           zero_pulse=cfg.THROTTLE_STOPPED_PWM,
+                           min_pulse=cfg.THROTTLE_REVERSE_PWM)
+
     V.add(steering, inputs=['angle'])
     V.add(throttle, inputs=['throttle'])
-    
 
     # #add tub to save data
     # inputs=['cam/image_array',
@@ -223,40 +220,33 @@ def autodrive(cfg, model_path=None):
     # th = TubHandler(path=cfg.DATA_PATH)
     # tub = th.new_tub_writer(inputs=inputs, types=types)
     # V.add(tub, inputs=inputs, run_condition='recording')
-    
-    
+
     # debugging inpots/outputs
     #attrs = dir(V)
     #print(attrs)
     for items in V.parts:
         print(items)
 
+    # Initialize IotClient
+    iot = IotClient(cfg, V)
 
-    #Start the vehicle and add the parts
+    #Start the vehicle
     V.start()
-    #V.update_parts()
 
-    print('Press Ctrl-C to exit')
+    # try:
+    #     V.run(rate_hz=cfg.DRIVE_LOOP_HZ,
+    #           max_loop_count=cfg.MAX_LOOPS)
+    # except KeyboardInterrupt:
+    #     print('pausing')
+    #     V.pause()
 
+    # Loop forever so IotClient can do it's thing
     try:
-        V.run(rate_hz=cfg.DRIVE_LOOP_HZ, 
-        max_loop_count=cfg.MAX_LOOPS)           
-    except KeyboardInterrupt: 
-        print('pausing')
-        V.pause()
-
-    time.sleep(20)
-
-    try:
-        V.run(rate_hz=cfg.DRIVE_LOOP_HZ, 
-        max_loop_count=cfg.MAX_LOOPS)           
-    except KeyboardInterrupt: 
-        print('pausing')
-        V.pause()
-
-    print("You are now driving semi-autonomous using local_angle and constant throttle.")
-
-    V.stop()
+        while True:
+            time.sleep(1)
+    except KeyboardInterrupt:
+        # Stop vehicle gracefully
+        V.stop()
 
 def train(cfg, tub_names, model_name):
     '''
@@ -294,10 +284,6 @@ def train(cfg, tub_names, model_name):
              steps=steps_per_epoch,
              train_split=cfg.TRAIN_TEST_SPLIT)
 
-
-
-
-
 if __name__ == '__main__':
     args = docopt(__doc__)
     cfg = dk.load_config()
@@ -313,8 +299,3 @@ if __name__ == '__main__':
         model = args['--model']
         cache = not args['--no_cache']
         train(cfg, tub, model)
-
-
-
-
-

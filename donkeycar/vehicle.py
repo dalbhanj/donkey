@@ -55,6 +55,16 @@ class Vehicle():
 
         self.parts.append(entry)
 
+    def get(self, part_name):
+        '''
+        **Description**
+        Returns the specified part.
+        '''
+        for entry in self.parts:
+            if entry['part'].__class__.__name__ is part_name:
+                print("Returning part " + part_name)
+                return entry['part']
+
 
     def start(self):
         """
