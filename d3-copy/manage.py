@@ -165,13 +165,13 @@ def autodrive(cfg, model_path=None):
     V.add(pilot_condition_part, inputs=['user/mode', 'keypress/mode'], outputs=['run_pilot'])
 
     #Run the pilot if the mode is not user.
-    # kl = KerasCategorical()
-    # if model_path:
-    #     kl.load(model_path)
+    kl = KerasCategorical()
+    if model_path:
+        kl.load(model_path)
 
-    # V.add(kl, inputs=['cam/image_array'],
-    #       outputs=['pilot/angle', 'pilot/throttle'],
-    #       run_condition='run_pilot')
+    V.add(kl, inputs=['cam/image_array'],
+          outputs=['pilot/angle', 'pilot/throttle'],
+          run_condition='run_pilot')
 
     #Choose what inputs should change the car.
     def drive_mode(mode,
