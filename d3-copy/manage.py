@@ -362,7 +362,9 @@ def turn(cfg):
     V.start()
 
     # Execute the three point turn
-    V.three_point_turn(rate_hz=cfg.DRIVE_LOOP_HZ)
+    #V.three_point_turn(rate_hz=cfg.DRIVE_LOOP_HZ)
+    # Execute the circle turn
+    V.circle_turn(rate_hz=cfg.DRIVE_LOOP_HZ)
 
     # Stop vehicle gracefully (if we ever get here)
     V.stop()
