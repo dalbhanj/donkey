@@ -64,7 +64,7 @@ AUTO_RECORD_ON_THROTTLE = True
 # IoT
 IOT_ENDPOINT = "ad16cm18p9apb.iot.us-east-1.amazonaws.com"
 ROOT_CERT_PATH = "./iotCerts/rootCA.pem"
-CERT_PATH = "./iotCerts/cert.pem"
+CERT_PATH_PATH = "./iotCerts/cert.pem"
 PRIVATE_KEY_PATH = "./iotCerts/private.key"
 CLIENT_NAME = "bot1"
 THING_NAME = "waiterbot-bot1"
