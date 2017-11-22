@@ -12,7 +12,7 @@ class IotClient:
         self.cfg = cfg
         self._shadow_client = AWSIoTMQTTShadowClient(cfg.CLIENT_NAME)
         self._shadow_client.configureEndpoint(cfg.IOT_ENDPOINT, 8883)
-        self._shadow_client.configureCredentials(cfg.ROOT_CERT, cfg.PRIVATE_KEY, cfg.CERT_PATH)
+        self._shadow_client.configureCredentials(cfg.ROOT_CERT_PATH, cfg.PRIVATE_KEY_PATH, cfg.CERT_PATH_PATH)
         self._shadow_client.configureConnectDisconnectTimeout(10)  # 10 sec
         self._shadow_client.configureMQTTOperationTimeout(5)  # 5 sec
 
