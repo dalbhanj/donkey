@@ -16,12 +16,11 @@ Options:
 """
 import os
 import time
+import json
 from docopt import docopt
-from AWSIoTPythonSDK import MQTTLib
-from AWSIoTPythonSDK.MQTTLib import AWSIoTMQTTClient
-from AWSIoTPythonSDK.MQTTLib import AWSIoTMQTTShadowClient
 
 import donkeycar as dk
+from iot import IotClient
 
 #import parts
 from donkeycar.parts.camera import PiCamera, MockCamera
@@ -30,7 +29,7 @@ from donkeycar.parts.keras import KerasCategorical
 from donkeycar.parts.actuator import PCA9685, PWMSteering, PWMThrottle, MockController
 from donkeycar.parts.datastore import TubHandler, TubGroup
 from donkeycar.parts.controller import LocalWebController, JoystickController
-from donkeycar.parts.keyboard import _GetCh, _GetChUnix
+#from donkeycar.parts.keyboard import _GetCh, _GetChUnix
 
 def request_callback(client, userdata, message):
     print("Received request from IoT")
@@ -150,7 +149,7 @@ def drive(cfg, model_path=None, use_joystick=False):
     
     print("You can now go to <your pi ip address>:8887 to drive your car.")
 
-def autodrive(cfg, model_path=None, use_joystick=False):
+def autodrive(cfg, model_path=None):
     '''Initialize semi-autonomous driving with local_angle and custom throttle option
     '''
 
@@ -158,23 +157,17 @@ def autodrive(cfg, model_path=None, use_joystick=False):
     V = dk.vehicle.Vehicle()
     cam = MockCamera(resolution=cfg.CAMERA_RESOLUTION)
     V.add(cam, outputs=['cam/image_array'], threaded=True)
-    
-    if use_joystick or cfg.USE_JOYSTICK_AS_DEFAULT:
-        #modify max_throttle closer to 1.0 to have more power
-        #modify steering_scale lower than 1.0 to have less responsive steering
-        ctr = JoystickController(max_throttle=cfg.JOYSTICK_MAX_THROTTLE,
-                                 steering_scale=cfg.JOYSTICK_STEERING_SCALE,
-                                 auto_record_on_throttle=cfg.AUTO_RECORD_ON_THROTTLE)
-    else:        
-        #This web controller will create a web server that is capable
-        #of managing steering, throttle, and modes, and more.
-        ctr = LocalWebController()
 
-    V.add(ctr, 
+    ctr = LocalWebController()
+
+    V.add(ctr,
           inputs=['cam/image_array'],
           outputs=['user/angle', 'user/throttle', 'user/mode', 'recording'],
           threaded=True)
-
+    
+    # # Settings for rover to run pilot_condition
+    # mode = 'local_angle'
+    
     #See if we should even run the pilot module. 
     #This is only needed because the part run_condition only accepts boolean
     def pilot_condition(mode):
@@ -232,55 +225,48 @@ def autodrive(cfg, model_path=None, use_joystick=False):
     V.add(steering, inputs=['angle'])
     V.add(throttle, inputs=['throttle'])
 
-    #add tub to save data
-    inputs=['cam/image_array',
-            'user/angle', 'user/throttle', 
-            'pilot/angle', 'pilot/throttle', 
-            'user/mode']
-    types=['image_array',
-           'float', 'float',  
-           'float', 'float', 
-           'str']
+    # #add tub to save data
+    # inputs=['cam/image_array',
+    #         'user/angle', 'user/throttle', 
+    #         'pilot/angle', 'pilot/throttle', 
+    #         'user/mode']
+    # types=['image_array',
+    #        'float', 'float',  
+    #        'float', 'float', 
+    #        'str']
     
-    th = TubHandler(path=cfg.DATA_PATH)
-    tub = th.new_tub_writer(inputs=inputs, types=types)
-    V.add(tub, inputs=inputs, run_condition='recording')
-    
-    
+    # th = TubHandler(path=cfg.DATA_PATH)
+    # tub = th.new_tub_writer(inputs=inputs, types=types)
+    # V.add(tub, inputs=inputs, run_condition='recording')
+
     # debugging inpots/outputs
     #attrs = dir(V)
     #print(attrs)
     for items in V.parts:
         print(items)
 
-    #Start the vehicle and add the parts
+    # Initialize IotClient
+    #iot = IotClient(cfg, V)
+
+    #Start the vehicle
     V.start()
-    #V.update_parts()
-
-    InKey = _GetCh()
-
-    print('Press Ctrl-C to exit')
-
-    c = InKey()
 
     try:
-      if c == 32:
-        keypress_mode='pause'
-        print("keypress_mode = ", keypress_mode)
-        V.pause()
-      elif c == 51:
-        print("doing 3-point turn")
-      else:
-        keypress_mode='run'
-        print ("keypress_mode = ", keypress_mode)
-        #V.update_parts()            
-        V.run(rate_hz=cfg.DRIVE_LOOP_HZ, 
-        max_loop_count=cfg.MAX_LOOPS)
-      c = InKey()
-    except KeyboardInterrupt: 
+        V.run(rate_hz=cfg.DRIVE_LOOP_HZ,
+              max_loop_count=cfg.MAX_LOOPS)
+    except KeyboardInterrupt:
+        print('pausing')
         V.pause()
 
-    print("You are now driving semi-autonomous using local_angle and constant throttle.")
+    # # Loop forever so IotClient can do it's thing
+    # try:
+    #     while True:
+    #         time.sleep(1)
+    # except KeyboardInterrupt:
+    #     # Stop vehicle gracefully
+    #     V.stop()
+    # while True:
+    #     time.sleep(1)
 
 def train(cfg, tub_names, model_name):
     '''
@@ -330,7 +316,7 @@ if __name__ == '__main__':
         drive(cfg, model_path = args['--model'], use_joystick=args['--js'])
 
     elif args['autodrive']:
-        autodrive(cfg, model_path = args['--model'], use_joystick=args['--js'])
+        autodrive(cfg, model_path = args['--model'])
 
     elif args['train']:
         tub = args['--tub']
