@@ -128,6 +128,27 @@ class Vehicle():
                 print("Shutting down Steering")
                 entry['part'].shutdown()
 
+    def circle_turn(self, rate_hz=10):
+        '''
+        **Description**
+        Make the rover turn in a circle
+        '''
+        print("Performing circle turn")
+        steering = self.get("PWMSteering")
+        throttle = self.get("PWMThrottle")
+        turn_duration = 0
+
+        # Perform the first point of the turn
+        print("First point of turn")
+        steering.run(-1)
+        while turn_duration < 100:
+            start_time = time.time()
+            throttle.run(-.25)
+            turn_duration = turn_duration + 1
+            sleep_time = 1.0 / rate_hz - (time.time() - start_time)
+            if sleep_time > 0.0:
+                time.sleep(sleep_time)
+
     def three_point_turn(self, rate_hz=10):
         '''
         **Description**
