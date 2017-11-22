@@ -121,7 +121,7 @@ class Vehicle():
                 start_time = time.time()            
                 loop_count += 1
 
-                #self.update_parts()
+                self.update_parts()
 
                 #stop drive loop if loop_count exceeds max_loopcount
                 if max_loop_count and loop_count > max_loop_count:
