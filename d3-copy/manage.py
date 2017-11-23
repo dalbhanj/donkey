@@ -362,10 +362,16 @@ def turn(cfg):
     V.start()
 
     iterations = 0
-    while iterations < 20:
-        # Execute the three point turn
-        V.three_point_turn(rate_hz=cfg.DRIVE_LOOP_HZ)
-        time.sleep(100)
+    try:
+        while iterations < 20:
+            print("----------------------------")
+            print("Iteration: " + str(iterations))
+            # Execute the three point turn
+            V.three_point_turn(rate_hz=cfg.DRIVE_LOOP_HZ)
+            iterations = iterations + 1
+            time.sleep(100)
+    except KeyboardInterrupt:
+        pass
     # Execute the circle turn
     #V.circle_turn(rate_hz=cfg.DRIVE_LOOP_HZ)
 
