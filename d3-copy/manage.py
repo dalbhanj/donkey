@@ -369,6 +369,7 @@ def turn(cfg):
             # Execute the three point turn
             V.three_point_turn(rate_hz=cfg.DRIVE_LOOP_HZ)
             iterations = iterations + 1
+            print("----------------------------")
             time.sleep(100)
     except KeyboardInterrupt:
         pass
