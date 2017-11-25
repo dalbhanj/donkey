@@ -154,49 +154,35 @@ class Vehicle():
         **Description**
         Make the rover perform a three point turn so it's facing 180 degrees from start
         '''
+
         print("Performing three point turn")
         steering = self.get("PWMSteering")
         throttle = self.get("PWMThrottle")
-        turn_duration = 0
+        print(rate_hz)
+
+        def run_parts(duration, angle, speed):
+            turn_duration = 0
+            while turn_duration < duration:
+                start_time = time.time()
+                steering.run(angle)
+                throttle.run(speed)
+                turn_duration = turn_duration + 1
+                sleep_time = 1.0 / rate_hz - (time.time() - start_time)
+                if sleep_time > 0.0:
+                    time.sleep(sleep_time)
+            self.pause()
 
         # Perform the first point of the turn
         print("First point of turn")
-        steering.run(-1)
-        while turn_duration < 25:
-            start_time = time.time()
-            throttle.run(-.25)
-            turn_duration = turn_duration + 1
-            sleep_time = 1.0 / rate_hz - (time.time() - start_time)
-            if sleep_time > 0.0:
-                time.sleep(sleep_time)
+        run_parts(25, -1, -.25)
+        time.sleep(5)
 
-        self.pause()
-        time.sleep(2)
         # Perform the second point
-        turn_duration = 0
-        print("Second point of turn")
-        steering.run(1)
-        while turn_duration < 50:
-            start_time = time.time()
-            throttle.run(.30)
-            turn_duration = turn_duration + 1
-            sleep_time = 1.0 / rate_hz - (time.time() - start_time)
-            if sleep_time > 0.0:
-                time.sleep(sleep_time)
+        run_parts(50, 1, .25)
+        time.sleep(5)
 
-        self.pause()
-        time.sleep(2)
         # Perform the third point
-        turn_duration = 0
-        print("third point of turn")
-        steering.run(-1)
-        while turn_duration < 25:
-            start_time = time.time()
-            throttle.run(-.30)
-            turn_duration = turn_duration + 1
-            sleep_time = 1.0 / rate_hz - (time.time() - start_time)
-            if sleep_time > 0.0:
-                time.sleep(sleep_time)
+        run_parts(25, -1, -.30)
 
     def update_parts(self):
         '''

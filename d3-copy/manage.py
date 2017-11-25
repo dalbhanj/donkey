@@ -361,10 +361,20 @@ def turn(cfg):
     #Start the vehicle
     V.start()
 
-    # Execute the three point turn
-    #V.three_point_turn(rate_hz=cfg.DRIVE_LOOP_HZ)
+    iterations = 0
+    try:
+        while iterations < 20:
+            print("----------------------------")
+            print("Iteration: " + str(iterations))
+            # Execute the three point turn
+            V.three_point_turn(rate_hz=cfg.DRIVE_LOOP_HZ)
+            iterations = iterations + 1
+            print("----------------------------")
+            time.sleep(100)
+    except KeyboardInterrupt:
+        pass
     # Execute the circle turn
-    V.circle_turn(rate_hz=cfg.DRIVE_LOOP_HZ)
+    #V.circle_turn(rate_hz=cfg.DRIVE_LOOP_HZ)
 
     # Stop vehicle gracefully (if we ever get here)
     V.stop()
