@@ -90,24 +90,24 @@ class IotClient:
         # The contents of the delta payload will tell us what action to take
         desired_state = payload_dict['state']
         if 'destination' in desired_state and 'current_order' in desired_state:
-            #if desired_state['destination'] is not 0: # moving to a table
-            # Get the model to get to the table
-            self.model_num = desired_state['destination']
-            # Update shadow with new values
-            self.shadow['state']['reported']['location'] = -1 # -1 for moving
-            self.shadow['state']['reported']['destination'] = desired_state['destination']
-            self.shadow['state']['reported']['current_order'] = desired_state['current_order']
-            print("Model # to use: " + str(self.model_num))
-            print("Current shadow: " + str(self.shadow))
-            # elif desired_state['destination'] is 0: # going back to kitchen
-            #     # The same model we used to get to the table we use to get back to the kitchen
-            #     self.model_num = self.shadow['state']['reported']['destination']
-            #     # Update shadow with new values
-            #     self.shadow['state']['reported']['location'] = -1 # -1 for moving
-            #     self.shadow['state']['reported']['destination'] = desired_state['destination']
-            #     self.shadow['state']['reported']['current_order'] = desired_state['current_order']
-            #     print("Model # to use: " + str(self.model_num))
-            #     print("Current shadow: " + str(self.shadow))
+            if desired_state['destination'] is not 0: # moving to a table
+                # Get the model to get to the table
+                self.model_num = desired_state['destination']
+                # Update shadow with new values
+                self.shadow['state']['reported']['location'] = -1 # -1 for moving
+                self.shadow['state']['reported']['destination'] = desired_state['destination']
+                self.shadow['state']['reported']['current_order'] = desired_state['current_order']
+                print("Model # to use: " + str(self.model_num))
+                print("Current shadow: " + str(self.shadow))
+            elif desired_state['destination'] is 0: # going back to kitchen
+                # The same model we used to get to the table we use to get back to the kitchen
+                self.model_num = self.shadow['state']['reported']['destination']
+                # Update shadow with new values
+                self.shadow['state']['reported']['location'] = -1 # -1 for moving
+                self.shadow['state']['reported']['destination'] = desired_state['destination']
+                self.shadow['state']['reported']['current_order'] = desired_state['current_order']
+                print("Model # to use: " + str(self.model_num))
+                print("Current shadow: " + str(self.shadow))
 
     def get_model_num(self):
         '''
