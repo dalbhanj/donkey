@@ -88,7 +88,7 @@ class Vehicle():
                     #start the update thread
                     entry.get('thread').start()
 
-            print('Starting vehicle...')
+            print('-----------------Vehicle started and ready to go-----------------')
             time.sleep(1)
         except KeyboardInterrupt:
             pass
@@ -99,7 +99,7 @@ class Vehicle():
         '''
         loop_count = 0
         self.running = True
-        print('starting drive loop')
+        print('Starting drive loop')
         while self.running:
             start_time = time.time()
             loop_count += 1
@@ -119,7 +119,7 @@ class Vehicle():
         '''
         Shutdown (set to zero) the throttle and steering
         '''
-        print('Vehicle is stopped')
+        print('Vehicle is paused.')
         for entry in self.parts:
             if entry['part'].__class__.__name__ is "PWMThrottle":
                 print("Shutting down Throttle")
@@ -160,7 +160,7 @@ class Vehicle():
         throttle = self.get("PWMThrottle")
         print(rate_hz)
 
-        def run_parts(duration, angle, speed):
+        def partial_turn(duration, angle, speed):
             turn_duration = 0
             while turn_duration < duration:
                 start_time = time.time()
@@ -174,15 +174,17 @@ class Vehicle():
 
         # Perform the first point of the turn
         print("First point of turn")
-        run_parts(25, -1, -.25)
+        partial_turn(25, -1, -.25)
         time.sleep(5)
 
         # Perform the second point
-        run_parts(50, 1, .25)
+        print("Second point of turn")
+        partial_turn(50, 1, .25)
         time.sleep(5)
 
         # Perform the third point
-        run_parts(25, -1, -.30)
+        print("Third point of turn")
+        partial_turn(25, -1, -.30)
 
     def update_parts(self):
         '''
@@ -224,4 +226,5 @@ class Vehicle():
                 entry['part'].shutdown()
             except Exception as e:
                 print(e)
+        print('-----------------Vehicle has been safely shutdown-----------------')
         print(self.mem.d)

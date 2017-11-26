@@ -223,8 +223,9 @@ def autodrive(cfg, model_path=None):
     try:
         while True:
             if iot.moving() is True:
-                if iot.get_destination() is not 0:
+                if iot.get_destination() is not 0: # Only load new model if we have to
                     print("Using model at " + cfg.MODEL_MAP[iot.get_model_num()])
+                    print("Loading new model...")
                     V.get("KerasCategorical").load(cfg.MODEL_MAP[iot.get_model_num()])
                 else:
                     print("Going back to kitchen using model " + cfg.MODEL_MAP[iot.get_model_num()])
