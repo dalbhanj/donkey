@@ -234,7 +234,7 @@ def autodrive(cfg, model_path=None):
                 except KeyboardInterrupt:
                     print('Pausing rover')
                     V.pause()
-                    V.three_point_turn()
+                    # V.three_point_turn()
                     iot.update_shadow_after_stop()
 
         time.sleep(1)
