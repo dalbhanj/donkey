@@ -226,6 +226,8 @@ def autodrive(cfg, model_path=None):
                 if iot.get_destination() is not 0:
                     print("Using model at " + cfg.MODEL_MAP[iot.get_model_num()])
                     V.get("KerasCategorical").load(cfg.MODEL_MAP[iot.get_model_num()])
+                else:
+                    print("Going back to kitchen using model " + cfg.MODEL_MAP[iot.get_model_num()])
 
                 try:
                     V.run(rate_hz=cfg.DRIVE_LOOP_HZ,
