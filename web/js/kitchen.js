@@ -66,3 +66,13 @@ function fulfillOrder(orderId) {
             console.log("Error fulfilling order");
         });
 }
+
+function confirmOrder() {
+    var jqxhr = $.post(_config.api.invokeUrl + '/waiterbot-order')
+        .done(function (data) {
+            console.log("Waiterbot is returning to the kitchen.");
+        })
+        .fail(function (data) {
+            console.log("Error submitting order");
+        });
+}
