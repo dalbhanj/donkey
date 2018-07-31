@@ -157,3 +157,24 @@ class IotClient:
         print("Updating shadow...")
         self.shadow['state']['reported']['location'] = self.shadow['state']['reported']['destination']
         self.shadow_handler.shadowUpdate(json.dumps(self.shadow), self._update_callback, 5)
+
+    def update_shadow_demo_lite(self):
+        '''
+        Called when the rover stops moving after driving the loop during the lite demo scenario.
+        The rover has driven either the left or right path and has returned to the starting point.
+        Shadow should be reset to initial state.
+        '''
+        print("Resetting shadow...")
+        # Delete any existing shadow and create a fresh one. Doing this right now cause it's easy
+        # This should be changed if I start dev on this again.
+        self.shadow_handler.shadowDelete(self._delete_callback, 5)
+        self.shadow = {
+            "state": {
+                "reported": {
+                    "location": 0,
+                    "destination": 0,
+                    "current_order": "0",
+                }
+            }
+        }
+        self.shadow_handler.shadowUpdate(json.dumps(self.shadow), self._update_callback, 5)
